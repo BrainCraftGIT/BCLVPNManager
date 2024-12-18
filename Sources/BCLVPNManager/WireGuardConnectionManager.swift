@@ -26,32 +26,37 @@ public class WireGuardConnectionManager {
     static var vpnStatus : VPNStatus = .disconnected
     
     public static func getInstance(name: String,
-                            tunnelIdentifier: String,
-                            appGroup: String,
-                            clientPrivateKey: String,
-                            clientAddress: String,
-                            serverPublicKey: String,
-                            serverAddress: String,
-                            serverPort: String) -> WireGuardConnectionManager {
-        //if wireguardConnectionManager == nil {
+                                   tunnelIdentifier: String,
+                                   appGroup: String,
+                                   clientPrivateKey: String,
+                                   clientAddress: String,
+                                   serverPublicKey: String,
+                                   serverAddress: String,
+                                   serverPort: String) -> WireGuardConnectionManager {
+        if wireguardConnectionManager == nil {
             wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort)
             
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(VPNStatusDidChange(notification:)),
-                name: VPNNotification.didChangeStatus,
-                object: nil
-            )
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(VPNDidFail(notification:)),
-                name: VPNNotification.didFail,
-                object: nil
-            )
             Task {
                 await vpn.prepare()
             }
-        //}
+        }
+        
+        return wireguardConnectionManager
+    }
+    
+    public static func updateConfig(name: String,
+                                    tunnelIdentifier: String,
+                                    appGroup: String,
+                                    clientPrivateKey: String,
+                                    clientAddress: String,
+                                    serverPublicKey: String,
+                                    serverAddress: String,
+                                    serverPort: String) -> WireGuardConnectionManager {
+        wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort)
+        
+        Task {
+            await vpn.prepare()
+        }
         
         return wireguardConnectionManager
     }

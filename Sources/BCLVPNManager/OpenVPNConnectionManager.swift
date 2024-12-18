@@ -36,19 +36,6 @@ public class OpenVPNConnectionManager: ObservableObject {
         if openVpnConnectionManager == nil {
             openVpnConnectionManager = OpenVPNConnectionManager(config: config, appGroup: appGroup, tunnelIdentifier: tunnelIdentifier, user: user, pass: pass, name: name)
             
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(VPNStatusDidChange(notification:)),
-                name: VPNNotification.didChangeStatus,
-                object: nil
-            )
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(VPNDidFail(notification:)),
-                name: VPNNotification.didFail,
-                object: nil
-            )
-            
             Task {
                 await vpn.prepare()
             }
