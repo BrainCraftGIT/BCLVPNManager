@@ -33,7 +33,7 @@ public class WireGuardConnectionManager {
                             serverPublicKey: String,
                             serverAddress: String,
                             serverPort: String) -> WireGuardConnectionManager {
-        if wireguardConnectionManager == nil {
+        //if wireguardConnectionManager == nil {
             wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort)
             
             NotificationCenter.default.addObserver(
@@ -51,7 +51,7 @@ public class WireGuardConnectionManager {
             Task {
                 await vpn.prepare()
             }
-        }
+        //}
         
         return wireguardConnectionManager
     }
