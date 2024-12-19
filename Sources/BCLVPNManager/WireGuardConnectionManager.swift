@@ -15,6 +15,7 @@ public typealias WireGuardTunnelProvider = TunnelKitWireGuardAppExtension.WireGu
 public class WireGuardConnectionManager {
     private static var wireguardConnectionManager: WireGuardConnectionManager!
     private static let vpn = NetworkExtensionVPN()
+    
     let name: String
     let tunnelIdentifier: String
     let appGroup: String
@@ -23,6 +24,8 @@ public class WireGuardConnectionManager {
     let serverPublicKey: String
     let serverAddress: String
     let serverPort: String
+    let dns: String
+    
     static var vpnStatus : VPNStatus = .disconnected
     
     public static func getInstance(name: String,
@@ -32,9 +35,10 @@ public class WireGuardConnectionManager {
                                    clientAddress: String,
                                    serverPublicKey: String,
                                    serverAddress: String,
-                                   serverPort: String) -> WireGuardConnectionManager {
+                                   serverPort: String,
+                                   dns: String) -> WireGuardConnectionManager {
         if wireguardConnectionManager == nil {
-            wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort)
+            wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort, dns: dns)
             
             Task {
                 await vpn.prepare()
@@ -51,8 +55,9 @@ public class WireGuardConnectionManager {
                                     clientAddress: String,
                                     serverPublicKey: String,
                                     serverAddress: String,
-                                    serverPort: String) -> WireGuardConnectionManager {
-        wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort)
+                                    serverPort: String,
+                                    dns: String) -> WireGuardConnectionManager {
+        wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort, dns: dns)
         
         Task {
             await vpn.prepare()
@@ -62,13 +67,14 @@ public class WireGuardConnectionManager {
     }
     
     private init(name: String,
-                tunnelIdentifier: String,
-                appGroup: String,
-                clientPrivateKey: String,
-                clientAddress: String,
-                serverPublicKey: String,
-                serverAddress: String,
-                serverPort: String) {
+                 tunnelIdentifier: String,
+                 appGroup: String,
+                 clientPrivateKey: String,
+                 clientAddress: String,
+                 serverPublicKey: String,
+                 serverAddress: String,
+                 serverPort: String,
+                 dns: String) {
         self.name = name
         self.tunnelIdentifier = tunnelIdentifier
         self.appGroup = appGroup
@@ -77,17 +83,7 @@ public class WireGuardConnectionManager {
         self.serverPublicKey = serverPublicKey
         self.serverAddress = serverAddress
         self.serverPort = serverPort
-    }
-    
-    @objc
-    private static func VPNStatusDidChange(notification: Notification) {
-        vpnStatus = notification.vpnStatus
-        print("VPNStatusDidChange: \(vpnStatus)")
-    }
-
-    @objc
-    private static func VPNDidFail(notification: Notification) {
-        print("VPNStatusDidFail: \(notification.vpnError.localizedDescription)")
+        self.dns = dns
     }
     
     public func connect() {
@@ -98,14 +94,16 @@ public class WireGuardConnectionManager {
             print(">>> \(error)")
             return
         }
+        
         builder.addresses = [clientAddress]
-        builder.dnsServers = ["8.8.8.8"]
+        builder.dnsServers = [dns]
         do {
             try builder.addPeer(serverPublicKey, endpoint: "\(serverAddress):\(serverPort)")
         } catch {
             print(">>> \(error)")
             return
         }
+        
         builder.addDefaultGatewayIPv4(toPeer: 0)
         let cfg = builder.build()
 
