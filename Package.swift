@@ -29,7 +29,8 @@ let package = Package(
             exclude: [],
             sources: [
                 "OpenVPNConnectionManager.swift",
-                "WireGuardConnectionManager.swift"
+                "WireGuardConnectionManager.swift",
+                "IKEv2ConnectionManager.swift"
             ],
             resources: []
         )
