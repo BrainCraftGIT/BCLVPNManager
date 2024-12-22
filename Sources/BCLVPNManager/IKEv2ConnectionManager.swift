@@ -9,20 +9,20 @@ import NetworkExtension
 
 public class IKEv2ConnectionManager {
     private static var ikev2ConnectionManager: IKEv2ConnectionManager!
-    private let vpnManager = NEVPNManager.shared()
+    private static let vpnManager = NEVPNManager.shared()
 
     private init() {}
 
-    public func getInstance(serverAddress: String, username: String, password: String, sharedSecret: String) {
+    public static func getInstance(serverAddress: String, username: String, password: String, sharedSecret: String) -> IKEv2ConnectionManager {
         if ikev2ConnectionManager == nil {
-            IKEv2ConnectionManager = IKEv2ConnectionManager()
+            ikev2ConnectionManager = IKEv2ConnectionManager()
             configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecret: sharedSecret)
         }
         
         return ikev2ConnectionManager
     }
     
-    func configureIKEv2(serverAddress: String, username: String, password: String, sharedSecret: String) {
+    static func configureIKEv2(serverAddress: String, username: String, password: String, sharedSecret: String) {
         let ikev2Protocol = NEVPNProtocolIKEv2()
 
         // Basic VPN Configuration
@@ -50,14 +50,14 @@ public class IKEv2ConnectionManager {
     }
 
     public func connect() {
-        vpnManager.loadFromPreferences { error in
+        IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
             if let error = error {
                 print("Failed to load VPN preferences: \(error.localizedDescription)")
                 return
             }
 
             do {
-                try self.vpnManager.connection.startVPNTunnel()
+                try IKEv2ConnectionManager.vpnManager.connection.startVPNTunnel()
                 print("VPN connection started.")
             } catch {
                 print("Failed to start VPN connection: \(error.localizedDescription)")
@@ -66,7 +66,7 @@ public class IKEv2ConnectionManager {
     }
 
     public func disconnect() {
-        vpnManager.connection.stopVPNTunnel()
+        IKEv2ConnectionManager.vpnManager.connection.stopVPNTunnel()
         print("VPN connection stopped.")
     }
 }
