@@ -45,8 +45,8 @@ public class IKEv2ConnectionManager {
                 ikev2Protocol.serverAddress = serverAddress
                 ikev2Protocol.username = username
                 ikev2Protocol.passwordReference = KeychainHelper.getPassword(account: "pass")
-                ikev2Protocol.authenticationMethod = .sharedSecret
-                ikev2Protocol.sharedSecretReference = KeychainHelper.getPassword(account: "ss")
+                ikev2Protocol.authenticationMethod = .none
+                ikev2Protocol.sharedSecretReference = nil//KeychainHelper.getPassword(account: "ss")
 
                 // Additional Settings
                 ikev2Protocol.useExtendedAuthentication = true
