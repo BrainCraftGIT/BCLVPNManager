@@ -101,7 +101,10 @@ class KeychainHelper {
         ]
 
         // Delete any existing item
-        SecItemDelete(query as CFDictionary)
+        let delStatus = SecItemDelete(query as CFDictionary)
+        if delStatus == errSecSuccess {
+            print("existing item deleted successfully.")
+        }
 
         // Add new item to the Keychain
         let addQuery: [String: Any] = [
@@ -126,7 +129,8 @@ class KeychainHelper {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: account,
-            kSecReturnData as String: true
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
         ]
 
         var item: CFTypeRef?
