@@ -23,40 +23,46 @@ public class IKEv2ConnectionManager {
     }
     
     static func configureIKEv2(serverAddress: String, username: String, password: String, sharedSecret: String) {
-        if KeychainHelper.savePassword(password, account: "pass") {
-            print("Password saved.")
-        } else {
-            print("Failed to save password.")
-        }
-        if KeychainHelper.savePassword(sharedSecret, account: "ss") {
-            print("Password saved.")
-        } else {
-            print("Failed to save password.")
-        }
-        
-        
-        let ikev2Protocol = NEVPNProtocolIKEv2()
-
-        // Basic VPN Configuration
-        ikev2Protocol.serverAddress = serverAddress
-        ikev2Protocol.username = username
-        ikev2Protocol.passwordReference = KeychainHelper.getPassword(account: "pass")
-        ikev2Protocol.authenticationMethod = .sharedSecret
-        ikev2Protocol.sharedSecretReference = KeychainHelper.getPassword(account: "ss")
-
-        // Additional Settings
-        ikev2Protocol.useExtendedAuthentication = true
-        ikev2Protocol.disconnectOnSleep = false // Change if you want disconnection during sleep
-
-        vpnManager.protocolConfiguration = ikev2Protocol
-        vpnManager.localizedDescription = "My IKEv2 VPN"
-        vpnManager.isEnabled = true
-
-        vpnManager.saveToPreferences { error in
-            if let error = error {
-                print("Failed to save VPN configuration: \(error.localizedDescription)")
+        vpnManager.loadFromPreferences { error in
+            if let error {
+                print("VPN preference loading error: \(String(describing: error))")
             } else {
-                print("VPN configuration saved successfully.")
+                if KeychainHelper.savePassword(password, account: "pass") {
+                    print("Password saved.")
+                } else {
+                    print("Failed to save password.")
+                }
+                if KeychainHelper.savePassword(sharedSecret, account: "ss") {
+                    print("Password saved.")
+                } else {
+                    print("Failed to save password.")
+                }
+                
+                
+                let ikev2Protocol = NEVPNProtocolIKEv2()
+
+                // Basic VPN Configuration
+                ikev2Protocol.serverAddress = serverAddress
+                ikev2Protocol.username = username
+                ikev2Protocol.passwordReference = KeychainHelper.getPassword(account: "pass")
+                ikev2Protocol.authenticationMethod = .sharedSecret
+                ikev2Protocol.sharedSecretReference = KeychainHelper.getPassword(account: "ss")
+
+                // Additional Settings
+                ikev2Protocol.useExtendedAuthentication = true
+                ikev2Protocol.disconnectOnSleep = false // Change if you want disconnection during sleep
+
+                vpnManager.protocolConfiguration = ikev2Protocol
+                vpnManager.localizedDescription = "My IKEv2 VPN"
+                vpnManager.isEnabled = true
+
+                vpnManager.saveToPreferences { error in
+                    if let error = error {
+                        print("Failed to save VPN configuration: \(error.localizedDescription)")
+                    } else {
+                        print("VPN configuration saved successfully.")
+                    }
+                }
             }
         }
     }
