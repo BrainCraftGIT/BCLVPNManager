@@ -28,7 +28,7 @@ public class IKEv2ConnectionManager {
     }
     
     public static func updateConfig(serverAddress: String, username: String, password: String, sharedSecret: String) -> IKEv2ConnectionManager {
-        //ikev2ConnectionManager = IKEv2ConnectionManager()
+        ikev2ConnectionManager = IKEv2ConnectionManager()
         configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecret: sharedSecret)
         
         return ikev2ConnectionManager
