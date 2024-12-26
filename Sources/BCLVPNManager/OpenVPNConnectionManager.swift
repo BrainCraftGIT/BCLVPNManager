@@ -42,6 +42,16 @@ public class OpenVPNConnectionManager {
         return openVpnConnectionManager
     }
     
+    public static func updateConfig(config: String, appGroup: String, tunnelIdentifier: String, user: String, pass: String, name: String) -> OpenVPNConnectionManager {
+        openVpnConnectionManager = OpenVPNConnectionManager(config: config, appGroup: appGroup, tunnelIdentifier: tunnelIdentifier, user: user, pass: pass, name: name)
+        
+        Task {
+            await vpn.prepare()
+        }
+        
+        return openVpnConnectionManager
+    }
+    
     private init(config: String, appGroup: String, tunnelIdentifier: String, user: String, pass: String, name: String) {
         self.config = config
         self.appGroup = appGroup

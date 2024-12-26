@@ -27,6 +27,13 @@ public class IKEv2ConnectionManager {
         return ikev2ConnectionManager
     }
     
+    public static func updateConfig(serverAddress: String, username: String, password: String, sharedSecret: String) -> IKEv2ConnectionManager {
+        //ikev2ConnectionManager = IKEv2ConnectionManager()
+        configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecret: sharedSecret)
+        
+        return ikev2ConnectionManager
+    }
+    
     static func configureIKEv2(serverAddress: String, username: String, password: String, sharedSecret: String) {
         vpnManager.loadFromPreferences { error in
             if let error {
@@ -52,7 +59,7 @@ public class IKEv2ConnectionManager {
                 ikev2Protocol.disconnectOnSleep = false // Change if you want disconnection during sleep
 
                 vpnManager.protocolConfiguration = ikev2Protocol
-                vpnManager.localizedDescription = "My IKEv2 VPN"
+                vpnManager.localizedDescription = "VPN Pro-IKEv2"
                 vpnManager.isEnabled = true
 
                 vpnManager.saveToPreferences { error in
