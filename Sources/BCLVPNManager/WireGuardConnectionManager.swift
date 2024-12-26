@@ -9,6 +9,9 @@ import Foundation
 import TunnelKitManager
 import TunnelKitWireGuard
 import TunnelKitWireGuardAppExtension
+import SwiftyBeaver
+
+private let log = SwiftyBeaver.self
 
 public typealias WireGuardTunnelProvider = TunnelKitWireGuardAppExtension.WireGuardTunnelProvider
 
@@ -91,7 +94,7 @@ public class WireGuardConnectionManager {
         do {
             builder = try WireGuard.ConfigurationBuilder(clientPrivateKey)
         } catch {
-            print(">>> \(error)")
+            log.verbose(">>> \(error)")
             return
         }
         
@@ -100,7 +103,7 @@ public class WireGuardConnectionManager {
         do {
             try builder.addPeer(serverPublicKey, endpoint: "\(serverAddress):\(serverPort)")
         } catch {
-            print(">>> \(error)")
+            log.verbose(">>> \(error)")
             return
         }
         

@@ -6,11 +6,16 @@
 //
 
 import NetworkExtension
+import Security
+import SwiftyBeaver
+
+private let log = SwiftyBeaver.self
 
 public class IKEv2ConnectionManager {
     private static var ikev2ConnectionManager: IKEv2ConnectionManager!
     private static let vpnManager = NEVPNManager.shared()
-
+    
+    
     private init() {}
 
     public static func getInstance(serverAddress: String, username: String, password: String, sharedSecret: String) -> IKEv2ConnectionManager {
@@ -25,19 +30,13 @@ public class IKEv2ConnectionManager {
     static func configureIKEv2(serverAddress: String, username: String, password: String, sharedSecret: String) {
         vpnManager.loadFromPreferences { error in
             if let error {
-                print("VPN preference loading error: \(String(describing: error))")
+                log.verbose("VPN preference loading error: \(String(describing: error))")
             } else {
                 if KeychainHelper.savePassword(password, account: "pass") {
-                    print("Password saved.")
+                    log.verbose("Password saved.")
                 } else {
-                    print("Failed to save password.")
+                    log.verbose("Failed to save password.")
                 }
-                if KeychainHelper.savePassword(sharedSecret, account: "ss") {
-                    print("Password saved.")
-                } else {
-                    print("Failed to save password.")
-                }
-                
                 
                 let ikev2Protocol = NEVPNProtocolIKEv2()
 
@@ -58,9 +57,9 @@ public class IKEv2ConnectionManager {
 
                 vpnManager.saveToPreferences { error in
                     if let error = error {
-                        print("Failed to save VPN configuration: \(error.localizedDescription)")
+                        log.verbose("Failed to save VPN configuration: \(error.localizedDescription)")
                     } else {
-                        print("VPN configuration saved successfully.")
+                        log.verbose("VPN configuration saved successfully.")
                     }
                 }
             }
@@ -70,33 +69,31 @@ public class IKEv2ConnectionManager {
     public func connect() {
         IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
             if let error = error {
-                print("Failed to load VPN preferences: \(error.localizedDescription)")
+                log.verbose("Failed to load VPN preferences: \(error.localizedDescription)")
                 return
             }
 
             do {
                 try IKEv2ConnectionManager.vpnManager.connection.startVPNTunnel()
-                print("VPN connection started.")
+                log.verbose("VPN connection started.")
             } catch {
-                print("Failed to start VPN connection: \(error.localizedDescription)")
+                log.verbose("Failed to start VPN connection: \(error.localizedDescription)")
             }
         }
     }
 
     public func disconnect() {
         IKEv2ConnectionManager.vpnManager.connection.stopVPNTunnel()
-        print("VPN connection stopped.")
+        log.verbose("VPN connection stopped.")
     }
 }
 
 // Keychain Wrapper for Secure Password Storage
-import Security
-
 class KeychainHelper {
     static func savePassword(_ password: String, account: String) -> Bool {
         // Convert password to Data
         guard let passwordData = password.data(using: .utf8) else {
-            print("Failed to encode password.")
+            log.verbose("Failed to encode password.")
             return false
         }
 
@@ -109,7 +106,7 @@ class KeychainHelper {
         // Delete any existing item
         let delStatus = SecItemDelete(query as CFDictionary)
         if delStatus == errSecSuccess {
-            print("existing item deleted successfully.")
+            log.verbose("existing item deleted successfully.")
         }
 
         // Add new item to the Keychain
@@ -122,10 +119,10 @@ class KeychainHelper {
         let status = SecItemAdd(addQuery as CFDictionary, nil)
 
         if status == errSecSuccess {
-            print("Password saved successfully.")
+            log.verbose("Password saved successfully.")
             return true
         } else {
-            print("Failed to save password. Error code: \(status)")
+            log.verbose("Failed to save password. Error code: \(status)")
             return false
         }
     }
@@ -145,7 +142,7 @@ class KeychainHelper {
         if status == errSecSuccess, let passwordData = item as? Data {
             return passwordData
         } else {
-            print("Failed to retrieve password. Error code: \(status)")
+            log.verbose("Failed to retrieve password. Error code: \(status)")
             return nil
         }
     }
