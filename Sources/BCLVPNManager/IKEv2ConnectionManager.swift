@@ -145,12 +145,12 @@ class KeychainHelper {
 
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
-
-        if status == errSecSuccess, let passwordData = item as? Data {
-            return passwordData
-        } else {
-            log.verbose("Failed to retrieve password. Error code: \(status)")
+        if status != errSecSuccess {
+            print("Failed to retrieve password. Error code: \(status)")
             return nil
         }
+
+        let passwordData = item as? Data
+        return passwordData
     }
 }
