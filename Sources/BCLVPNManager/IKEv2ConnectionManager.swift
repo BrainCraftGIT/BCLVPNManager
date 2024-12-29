@@ -100,13 +100,14 @@ public class IKEv2ConnectionManager {
                 let ikev2Protocol = NEVPNProtocolIKEv2()
 
                 // Basic VPN Configuration
-                ikev2Protocol.serverAddress = IKEv2ConnectionManager.serverAddress
                 ikev2Protocol.username = IKEv2ConnectionManager.username
                 ikev2Protocol.passwordReference = KeychainHelper.getPassword(account: "ikev2vpn", service: "pass")
-                ikev2Protocol.authenticationMethod = .none
+                ikev2Protocol.serverAddress = IKEv2ConnectionManager.serverAddress
                 ikev2Protocol.sharedSecretReference = nil//KeychainHelper.getPassword(account: "ss")
-
-                // Additional Settings
+                ikev2Protocol.localIdentifier = IKEv2ConnectionManager.username
+                ikev2Protocol.remoteIdentifier = IKEv2ConnectionManager.serverAddress
+                
+                ikev2Protocol.authenticationMethod = .none
                 ikev2Protocol.useExtendedAuthentication = true
                 ikev2Protocol.disconnectOnSleep = false // Change if you want disconnection during sleep
 
