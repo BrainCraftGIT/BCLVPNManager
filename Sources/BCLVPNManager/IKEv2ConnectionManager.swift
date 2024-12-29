@@ -14,6 +14,9 @@ private let log = SwiftyBeaver.self
 public class IKEv2ConnectionManager {
     private static var ikev2ConnectionManager: IKEv2ConnectionManager!
     private static let vpnManager = NEVPNManager.shared()
+    private static var password: String = ""
+    private static var serverAddress: String = ""
+    private static var username: String = ""
     
     
     private init() {}
@@ -35,11 +38,60 @@ public class IKEv2ConnectionManager {
     }
     
     static func configureIKEv2(serverAddress: String, username: String, password: String, sharedSecret: String) {
-        vpnManager.loadFromPreferences { error in
+        self.username = username
+        self.password = password
+        self.serverAddress = serverAddress
+//        vpnManager.loadFromPreferences { error in
+//            if let error {
+//                log.verbose("VPN preference loading error: \(String(describing: error))")
+//            } else {
+//                if KeychainHelper.savePassword(password, account: "ikev2vpn", service: "pass") {
+//                    log.verbose("Password saved.")
+//                } else {
+//                    log.verbose("Failed to save password.")
+//                }
+//                
+//                let ikev2Protocol = NEVPNProtocolIKEv2()
+//
+//                // Basic VPN Configuration
+//                ikev2Protocol.serverAddress = serverAddress
+//                ikev2Protocol.username = username
+//                ikev2Protocol.passwordReference = KeychainHelper.getPassword(account: "ikev2vpn", service: "pass")
+//                ikev2Protocol.authenticationMethod = .none
+//                ikev2Protocol.sharedSecretReference = nil//KeychainHelper.getPassword(account: "ss")
+//
+//                // Additional Settings
+//                ikev2Protocol.useExtendedAuthentication = false
+//                ikev2Protocol.disconnectOnSleep = false // Change if you want disconnection during sleep
+//
+//                vpnManager.protocolConfiguration = ikev2Protocol
+//                vpnManager.localizedDescription = "VPN Pro-IKEv2"
+//                vpnManager.isEnabled = true
+//
+//                vpnManager.saveToPreferences { error in
+//                    if let error = error {
+//                        log.verbose("Failed to save VPN configuration: \(error.localizedDescription)")
+//                    } else {
+//                        log.verbose("VPN configuration saved successfully.")
+//                        vpnManager.loadFromPreferences { error in
+//                            if let error {
+//                                log.verbose("VPN preference loading error: \(String(describing: error))")
+//                            } else {
+//                                log.verbose("VPN configuration loaded after save successfully.")
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    public func connect() {
+        IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
             if let error {
                 log.verbose("VPN preference loading error: \(String(describing: error))")
             } else {
-                if KeychainHelper.savePassword(password, account: "ikev2vpn", service: "pass") {
+                if KeychainHelper.savePassword(IKEv2ConnectionManager.password, account: "ikev2vpn", service: "pass") {
                     log.verbose("Password saved.")
                 } else {
                     log.verbose("Failed to save password.")
@@ -48,8 +100,8 @@ public class IKEv2ConnectionManager {
                 let ikev2Protocol = NEVPNProtocolIKEv2()
 
                 // Basic VPN Configuration
-                ikev2Protocol.serverAddress = serverAddress
-                ikev2Protocol.username = username
+                ikev2Protocol.serverAddress = IKEv2ConnectionManager.serverAddress
+                ikev2Protocol.username = IKEv2ConnectionManager.username
                 ikev2Protocol.passwordReference = KeychainHelper.getPassword(account: "ikev2vpn", service: "pass")
                 ikev2Protocol.authenticationMethod = .none
                 ikev2Protocol.sharedSecretReference = nil//KeychainHelper.getPassword(account: "ss")
@@ -58,33 +110,30 @@ public class IKEv2ConnectionManager {
                 ikev2Protocol.useExtendedAuthentication = false
                 ikev2Protocol.disconnectOnSleep = false // Change if you want disconnection during sleep
 
-                vpnManager.protocolConfiguration = ikev2Protocol
-                vpnManager.localizedDescription = "VPN Pro-IKEv2"
-                vpnManager.isEnabled = true
+                IKEv2ConnectionManager.vpnManager.protocolConfiguration = ikev2Protocol
+                IKEv2ConnectionManager.vpnManager.localizedDescription = "VPN Pro-IKEv2"
+                IKEv2ConnectionManager.vpnManager.isEnabled = true
 
-                vpnManager.saveToPreferences { error in
+                IKEv2ConnectionManager.vpnManager.saveToPreferences { error in
                     if let error = error {
                         log.verbose("Failed to save VPN configuration: \(error.localizedDescription)")
                     } else {
                         log.verbose("VPN configuration saved successfully.")
+                        IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
+                            if let error = error {
+                                log.verbose("Failed to load VPN preferences: \(error.localizedDescription)")
+                                return
+                            }
+
+                            do {
+                                try IKEv2ConnectionManager.vpnManager.connection.startVPNTunnel()
+                                log.verbose("VPN connection started.")
+                            } catch {
+                                log.verbose("Failed to start VPN connection: \(error.localizedDescription)")
+                            }
+                        }
                     }
                 }
-            }
-        }
-    }
-
-    public func connect() {
-        IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
-            if let error = error {
-                log.verbose("Failed to load VPN preferences: \(error.localizedDescription)")
-                return
-            }
-
-            do {
-                try IKEv2ConnectionManager.vpnManager.connection.startVPNTunnel()
-                log.verbose("VPN connection started.")
-            } catch {
-                log.verbose("Failed to start VPN connection: \(error.localizedDescription)")
             }
         }
     }
