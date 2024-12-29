@@ -107,7 +107,7 @@ public class IKEv2ConnectionManager {
                 ikev2Protocol.sharedSecretReference = nil//KeychainHelper.getPassword(account: "ss")
 
                 // Additional Settings
-                ikev2Protocol.useExtendedAuthentication = false
+                ikev2Protocol.useExtendedAuthentication = true
                 ikev2Protocol.disconnectOnSleep = false // Change if you want disconnection during sleep
 
                 IKEv2ConnectionManager.vpnManager.protocolConfiguration = ikev2Protocol
