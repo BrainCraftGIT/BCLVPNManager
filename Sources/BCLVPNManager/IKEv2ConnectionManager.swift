@@ -50,12 +50,12 @@ public class IKEv2ConnectionManager {
                 // Basic VPN Configuration
                 ikev2Protocol.serverAddress = serverAddress
                 ikev2Protocol.username = username
-                ikev2Protocol.passwordReference = password.data(using: .utf8)//KeychainHelper.getPassword(account: "ikev2vpn", service: "pass")
+                ikev2Protocol.passwordReference = KeychainHelper.getPassword(account: "ikev2vpn", service: "pass")
                 ikev2Protocol.authenticationMethod = .none
                 ikev2Protocol.sharedSecretReference = nil//KeychainHelper.getPassword(account: "ss")
 
                 // Additional Settings
-                ikev2Protocol.useExtendedAuthentication = true
+                ikev2Protocol.useExtendedAuthentication = false
                 ikev2Protocol.disconnectOnSleep = false // Change if you want disconnection during sleep
 
                 vpnManager.protocolConfiguration = ikev2Protocol
