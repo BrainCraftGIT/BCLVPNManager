@@ -41,49 +41,6 @@ public class IKEv2ConnectionManager {
         self.username = username
         self.password = password
         self.serverAddress = serverAddress
-//        vpnManager.loadFromPreferences { error in
-//            if let error {
-//                log.verbose("VPN preference loading error: \(String(describing: error))")
-//            } else {
-//                if KeychainHelper.savePassword(password, account: "ikev2vpn", service: "pass") {
-//                    log.verbose("Password saved.")
-//                } else {
-//                    log.verbose("Failed to save password.")
-//                }
-//                
-//                let ikev2Protocol = NEVPNProtocolIKEv2()
-//
-//                // Basic VPN Configuration
-//                ikev2Protocol.serverAddress = serverAddress
-//                ikev2Protocol.username = username
-//                ikev2Protocol.passwordReference = KeychainHelper.getPassword(account: "ikev2vpn", service: "pass")
-//                ikev2Protocol.authenticationMethod = .none
-//                ikev2Protocol.sharedSecretReference = nil//KeychainHelper.getPassword(account: "ss")
-//
-//                // Additional Settings
-//                ikev2Protocol.useExtendedAuthentication = false
-//                ikev2Protocol.disconnectOnSleep = false // Change if you want disconnection during sleep
-//
-//                vpnManager.protocolConfiguration = ikev2Protocol
-//                vpnManager.localizedDescription = "VPN Pro-IKEv2"
-//                vpnManager.isEnabled = true
-//
-//                vpnManager.saveToPreferences { error in
-//                    if let error = error {
-//                        log.verbose("Failed to save VPN configuration: \(error.localizedDescription)")
-//                    } else {
-//                        log.verbose("VPN configuration saved successfully.")
-//                        vpnManager.loadFromPreferences { error in
-//                            if let error {
-//                                log.verbose("VPN preference loading error: \(String(describing: error))")
-//                            } else {
-//                                log.verbose("VPN configuration loaded after save successfully.")
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
     }
 
     public func connect() {
@@ -91,7 +48,7 @@ public class IKEv2ConnectionManager {
             if let error {
                 log.verbose("VPN preference loading error: \(String(describing: error))")
             } else {
-                if KeychainHelper.savePassword(IKEv2ConnectionManager.password, account: "ikev2vpn", service: "pass") {
+                if KeychainHelper.savePassword(IKEv2ConnectionManager.password, account: "pass") {
                     log.verbose("Password saved.")
                 } else {
                     log.verbose("Failed to save password.")
@@ -101,7 +58,7 @@ public class IKEv2ConnectionManager {
 
                 // Basic VPN Configuration
                 ikev2Protocol.username = IKEv2ConnectionManager.username
-                ikev2Protocol.passwordReference = KeychainHelper.getPassword(account: "ikev2vpn", service: "pass")
+                ikev2Protocol.passwordReference = KeychainHelper.getPassword(account: "pass")
                 ikev2Protocol.serverAddress = IKEv2ConnectionManager.serverAddress
                 ikev2Protocol.sharedSecretReference = nil//KeychainHelper.getPassword(account: "ss")
                 ikev2Protocol.localIdentifier = IKEv2ConnectionManager.username
@@ -147,7 +104,7 @@ public class IKEv2ConnectionManager {
 
 // Keychain Wrapper for Secure Password Storage
 class KeychainHelper {
-    static func savePassword(_ password: String, account: String, service: String) -> Bool {
+    static func savePassword(_ password: String, account: String) -> Bool {
         // Convert password to Data
         guard let passwordData = password.data(using: .utf8) else {
             log.verbose("Failed to encode password.")
@@ -155,45 +112,41 @@ class KeychainHelper {
         }
 
         // Create query to delete existing item (if any)
-        let query: [String: Any] = [
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked,
             kSecAttrAccount as String: account
         ]
-
-        // Delete any existing item
-        let delStatus = SecItemDelete(query as CFDictionary)
-        if delStatus == errSecSuccess {
-            print("existing item deleted successfully.")
+        
+        var status: OSStatus
+        if SecItemCopyMatching(query as CFDictionary, nil) == errSecSuccess {
+            let attributesToUpdate: [String: Any] = [
+                kSecValueData as String: passwordData
+            ]
+            
+            status = SecItemUpdate(query as CFDictionary, attributesToUpdate as CFDictionary)
+        } else {
+            query[kSecValueData as String] = passwordData
+            status = SecItemAdd(query as CFDictionary, nil)
         }
-
-        // Add new item to the Keychain
-        let addQuery: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: account,
-            kSecAttrService as String: service,
-            kSecValueData as String: passwordData
-        ]
-
-        let status = SecItemAdd(addQuery as CFDictionary, nil)
-
+        
         if status == errSecSuccess {
             print("Password saved successfully.")
             return true
         } else {
-            log.verbose("Failed to save password. Error code: \(status)")
+            print("Failed to save password. Error code: \(status)")
             return false
         }
     }
 
-    static func getPassword(account: String, service: String) -> Data? {
+    static func getPassword(account: String) -> Data? {
         // Create query to retrieve password
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked,
             kSecAttrAccount as String: account,
-            kSecAttrService as String: service,
-            kSecMatchLimit as String: kSecMatchLimitOne,
-            kSecReturnAttributes as String: true,
-            kSecReturnData as String: true
+            kSecMatchLimitOne as String: true,
+            kSecReturnPersistentRef as String: true
         ]
 
         var item: CFTypeRef?
