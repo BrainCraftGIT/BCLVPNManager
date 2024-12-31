@@ -15,6 +15,7 @@ public class IKEv2ConnectionManager {
     private static var ikev2ConnectionManager: IKEv2ConnectionManager!
     private static let vpnManager = NEVPNManager.shared()
     private static var password: String = ""
+    private static var sharedSecret: String = ""
     private static var serverAddress: String = ""
     private static var username: String = ""
     
@@ -53,19 +54,26 @@ public class IKEv2ConnectionManager {
                 } else {
                     log.verbose("Failed to save password.")
                 }
+                if KeychainHelper.savePassword(IKEv2ConnectionManager.sharedSecret, account: "ss") {
+                    log.verbose("Password saved.")
+                } else {
+                    log.verbose("Failed to save password.")
+                }
                 
                 let ikev2Protocol = NEVPNProtocolIKEv2()
 
                 // Basic VPN Configuration
+                let sharedSecretReference = KeychainHelper.getPassword(account: "ss")
                 ikev2Protocol.username = IKEv2ConnectionManager.username
                 ikev2Protocol.passwordReference = KeychainHelper.getPassword(account: "pass")
                 ikev2Protocol.serverAddress = IKEv2ConnectionManager.serverAddress
-                ikev2Protocol.sharedSecretReference = nil//KeychainHelper.getPassword(account: "ss")
+                ikev2Protocol.sharedSecretReference = sharedSecretReference
                 ikev2Protocol.localIdentifier = IKEv2ConnectionManager.username
                 ikev2Protocol.remoteIdentifier = IKEv2ConnectionManager.serverAddress
                 
-                ikev2Protocol.authenticationMethod = .none
-                ikev2Protocol.useExtendedAuthentication = true
+                let usingSharedSecret = sharedSecretReference != nil
+                ikev2Protocol.authenticationMethod = usingSharedSecret ? .sharedSecret : .none
+                ikev2Protocol.useExtendedAuthentication = !usingSharedSecret
                 ikev2Protocol.disconnectOnSleep = false // Change if you want disconnection during sleep
 
                 IKEv2ConnectionManager.vpnManager.protocolConfiguration = ikev2Protocol
