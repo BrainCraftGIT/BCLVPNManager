@@ -139,10 +139,10 @@ class KeychainHelper {
         }
         
         if status == errSecSuccess {
-            print("Password saved successfully.")
+            log.verbose("Password saved successfully.")
             return true
         } else {
-            print("Failed to save password. Error code: \(status)")
+            log.verbose("Failed to save password. Error code: \(status)")
             return false
         }
     }
@@ -160,7 +160,7 @@ class KeychainHelper {
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
         if status != errSecSuccess {
-            print("Failed to retrieve password. Error code: \(status)")
+            log.verbose("Failed to retrieve password. Error code: \(status)")
             return nil
         }
 
