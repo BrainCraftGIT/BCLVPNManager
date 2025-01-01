@@ -10,6 +10,7 @@ import TunnelKitManager
 import TunnelKitWireGuard
 import TunnelKitWireGuardAppExtension
 import SwiftyBeaver
+import NetworkExtension
 
 private let log = SwiftyBeaver.self
 
@@ -87,6 +88,11 @@ public class WireGuardConnectionManager {
         self.serverAddress = serverAddress
         self.serverPort = serverPort
         self.dns = dns
+    }
+    
+    public func getConnectionDetail() async throws -> (status: NEVPNStatus?, localizedDescription: String?, serverAddress: String?) {
+        let result = try await WireGuardConnectionManager.vpn.getConnectionDetails()
+        return result
     }
     
     public func connect() {

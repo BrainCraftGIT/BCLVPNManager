@@ -8,6 +8,7 @@
 import NetworkExtension
 import Security
 import SwiftyBeaver
+import TunnelKitManager
 
 private let log = SwiftyBeaver.self
 
@@ -42,6 +43,11 @@ public class IKEv2ConnectionManager {
         self.username = username
         self.password = password
         self.serverAddress = serverAddress
+    }
+    
+    public func getConnectionDetail() -> (status: NEVPNStatus?, localizedDescription: String?, serverAddress: String?) {
+        let connection = IKEv2ConnectionManager.vpnManager.connection
+        return (connection.status, connection.manager.localizedDescription, connection.manager.protocolConfiguration?.serverAddress)
     }
 
     public func connect() {

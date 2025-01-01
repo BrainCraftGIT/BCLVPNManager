@@ -10,6 +10,7 @@ import Combine
 import TunnelKitManager
 import TunnelKitOpenVPN
 import TunnelKitOpenVPNAppExtension
+import NetworkExtension
 
 public typealias OpenVPNTunnelProvider = TunnelKitOpenVPNAppExtension.OpenVPNTunnelProvider
 public typealias VPNStatus = TunnelKitManager.VPNStatus
@@ -59,6 +60,11 @@ public class OpenVPNConnectionManager {
         self.user = user
         self.pass = pass
         self.name = name
+    }
+    
+    public func getConnectionDetail() async throws -> (status: NEVPNStatus?, localizedDescription: String?, serverAddress: String?) {
+        let result = try await OpenVPNConnectionManager.vpn.getConnectionDetails()
+        return result
     }
     
     public func disconnect() {
