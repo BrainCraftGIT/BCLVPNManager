@@ -132,17 +132,13 @@ class KeychainHelper {
             kSecAttrAccount as String: account
         ]
         
-        var status: OSStatus
-        if SecItemCopyMatching(query as CFDictionary, nil) == errSecSuccess {
-            let attributesToUpdate: [String: Any] = [
-                kSecValueData as String: passwordData
-            ]
-            
-            status = SecItemUpdate(query as CFDictionary, attributesToUpdate as CFDictionary)
-        } else {
-            query[kSecValueData as String] = passwordData
-            status = SecItemAdd(query as CFDictionary, nil)
+        let delStatus = SecItemDelete(query as CFDictionary)
+        if delStatus == errSecSuccess {
+            print("existing item deleted successfully.")
         }
+        
+        query[kSecValueData as String] = passwordData
+        let status = SecItemAdd(query as CFDictionary, nil)
         
         if status == errSecSuccess {
             log.verbose("Password saved successfully.")
