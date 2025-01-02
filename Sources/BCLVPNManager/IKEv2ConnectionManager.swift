@@ -23,7 +23,7 @@ public class IKEv2ConnectionManager {
     
     private init() {}
 
-    public static func getInstance(serverAddress: String, username: String, password: String, sharedSecret: String) -> IKEv2ConnectionManager {
+    public static func getInstance(serverAddress: String, username: String, password: String, sharedSecret: String?) -> IKEv2ConnectionManager {
         if ikev2ConnectionManager == nil {
             ikev2ConnectionManager = IKEv2ConnectionManager()
             configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecret: sharedSecret)
@@ -32,14 +32,14 @@ public class IKEv2ConnectionManager {
         return ikev2ConnectionManager
     }
     
-    public static func updateConfig(serverAddress: String, username: String, password: String, sharedSecret: String) -> IKEv2ConnectionManager {
+    public static func updateConfig(serverAddress: String, username: String, password: String, sharedSecret: String?) -> IKEv2ConnectionManager {
         ikev2ConnectionManager = IKEv2ConnectionManager()
         configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecret: sharedSecret)
         
         return ikev2ConnectionManager
     }
     
-    static func configureIKEv2(serverAddress: String, username: String, password: String, sharedSecret: String) {
+    static func configureIKEv2(serverAddress: String, username: String, password: String, sharedSecret: String?) {
         self.username = username
         self.password = password
         self.serverAddress = serverAddress
@@ -60,7 +60,7 @@ public class IKEv2ConnectionManager {
                 } else {
                     log.verbose("Failed to save password.")
                 }
-                if KeychainHelper.savePassword(IKEv2ConnectionManager.sharedSecret!, account: "ss") {
+                if KeychainHelper.savePassword(IKEv2ConnectionManager.sharedSecret, account: "ss") {
                     log.verbose("Password saved.")
                 } else {
                     log.verbose("Failed to save password.")
@@ -118,8 +118,10 @@ public class IKEv2ConnectionManager {
 
 // Keychain Wrapper for Secure Password Storage
 class KeychainHelper {
-    static func savePassword(_ password: String, account: String) -> Bool {
+    static func savePassword(_ password: String?, account: String) -> Bool {
         // Convert password to Data
+        guard let password else { return false }
+        
         guard let passwordData = password.data(using: .utf8) else {
             log.verbose("Failed to encode password.")
             return false
