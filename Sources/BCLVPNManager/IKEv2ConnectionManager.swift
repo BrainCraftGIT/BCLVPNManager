@@ -119,14 +119,6 @@ public class IKEv2ConnectionManager {
 // Keychain Wrapper for Secure Password Storage
 class KeychainHelper {
     static func savePassword(_ password: String?, account: String) -> Bool {
-        // Convert password to Data
-        guard let password else { return false }
-        
-        guard let passwordData = password.data(using: .utf8) else {
-            log.verbose("Failed to encode password.")
-            return false
-        }
-
         // Create query to delete existing item (if any)
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -139,7 +131,7 @@ class KeychainHelper {
             print("existing item deleted successfully.")
         }
         
-        query[kSecValueData as String] = passwordData
+        query[kSecValueData as String] = password?.data(using: .utf8)
         let status = SecItemAdd(query as CFDictionary, nil)
         
         if status == errSecSuccess {
