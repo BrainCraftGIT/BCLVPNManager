@@ -13,7 +13,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/BrainCraftGIT/tunnelkit.git", branch: "expose-tunnelkitmanager")
+        .package(url: "https://github.com/BrainCraftGIT/tunnelkit.git", branch: "con-detail-exclude")
     ],
     targets: [
         .target(
