@@ -16,7 +16,7 @@ public class IKEv2ConnectionManager {
     private static var ikev2ConnectionManager: IKEv2ConnectionManager!
     private static let vpnManager = NEVPNManager.shared()
     private static var password: String = ""
-    private static var sharedSecret: String = ""
+    private static var sharedSecret: String? = nil
     private static var serverAddress: String = ""
     private static var username: String = ""
     
@@ -60,7 +60,7 @@ public class IKEv2ConnectionManager {
                 } else {
                     log.verbose("Failed to save password.")
                 }
-                if KeychainHelper.savePassword(IKEv2ConnectionManager.sharedSecret, account: "ss") {
+                if KeychainHelper.savePassword(IKEv2ConnectionManager.sharedSecret!, account: "ss") {
                     log.verbose("Password saved.")
                 } else {
                     log.verbose("Failed to save password.")
