@@ -128,10 +128,15 @@ class KeychainHelper {
         
         let delStatus = SecItemDelete(query as CFDictionary)
         if delStatus == errSecSuccess {
-            print("existing item deleted successfully.")
+            log.verbose("existing item deleted successfully.")
         }
         
-        query[kSecValueData as String] = password?.data(using: .utf8)
+        guard let passwordData = password?.data(using: .utf8) else {
+            log.verbose("password is invalid!")
+            return false
+        }
+        
+        query[kSecValueData as String] = passwordData
         let status = SecItemAdd(query as CFDictionary, nil)
         
         if status == errSecSuccess {
