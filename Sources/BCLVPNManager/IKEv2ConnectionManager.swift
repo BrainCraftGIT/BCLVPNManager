@@ -20,7 +20,6 @@ public class IKEv2ConnectionManager {
     private static var serverAddress: String = ""
     private static var username: String = ""
     
-    
     private init() {}
 
     public static func getInstance(serverAddress: String, username: String, password: String, sharedSecret: String?) -> IKEv2ConnectionManager {
@@ -50,6 +49,21 @@ public class IKEv2ConnectionManager {
         return (connection.status, connection.manager.localizedDescription, connection.manager.protocolConfiguration?.serverAddress)
     }
 
+    
+}
+
+
+
+extension IKEv2ConnectionManager: VPNConnectionManager {
+    public static func setup(with config: any VPNConnectionConfig) -> (any VPNConnectionManager)? {
+        guard let config = config as? IKEv2ConnectionConfig else {
+            print("config isn't valid!")
+            return nil
+        }
+        
+        return IKEv2ConnectionManager.getInstance(serverAddress: config.serverIp, username: config.username, password: config.passwordReference, sharedSecret: config.sharedSecretReference)
+    }
+    
     public func connect() {
         IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
             if let error {
@@ -113,59 +127,5 @@ public class IKEv2ConnectionManager {
     public func disconnect() {
         IKEv2ConnectionManager.vpnManager.connection.stopVPNTunnel()
         log.verbose("VPN connection stopped.")
-    }
-}
-
-// Keychain Wrapper for Secure Password Storage
-class KeychainHelper {
-    static func savePassword(_ password: String?, account: String) -> Bool {
-        // Create query to delete existing item (if any)
-        var query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked,
-            kSecAttrAccount as String: account
-        ]
-        
-        let delStatus = SecItemDelete(query as CFDictionary)
-        if delStatus == errSecSuccess {
-            log.verbose("existing item deleted successfully.")
-        }
-        
-        guard let passwordData = password?.data(using: .utf8) else {
-            log.verbose("password is invalid!")
-            return false
-        }
-        
-        query[kSecValueData as String] = passwordData
-        let status = SecItemAdd(query as CFDictionary, nil)
-        
-        if status == errSecSuccess {
-            log.verbose("Password saved successfully.")
-            return true
-        } else {
-            log.verbose("Failed to save password. Error code: \(status)")
-            return false
-        }
-    }
-
-    static func getPassword(account: String) -> Data? {
-        // Create query to retrieve password
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked,
-            kSecAttrAccount as String: account,
-            kSecMatchLimitOne as String: true,
-            kSecReturnPersistentRef as String: true
-        ]
-
-        var item: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &item)
-        if status != errSecSuccess {
-            log.verbose("Failed to retrieve password. Error code: \(status)")
-            return nil
-        }
-
-        let passwordData = item as? Data
-        return passwordData
     }
 }

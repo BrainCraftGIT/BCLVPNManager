@@ -28,9 +28,13 @@ let package = Package(
             path: "Sources/BCLVPNManager",
             exclude: [],
             sources: [
+                "BCLVPNManager.swift",
+                "VPNConnectionConfig.swift",
+                "VPNConnectionManager.swift",
                 "OpenVPNConnectionManager.swift",
                 "WireGuardConnectionManager.swift",
-                "IKEv2ConnectionManager.swift"
+                "IKEv2ConnectionManager.swift",
+                "KeychainHelper.swift"
             ],
             resources: []
         )

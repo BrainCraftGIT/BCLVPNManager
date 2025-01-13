@@ -94,6 +94,17 @@ public class WireGuardConnectionManager {
         let result = try await WireGuardConnectionManager.vpn.getConnectionDetails()
         return result
     }
+}
+
+extension WireGuardConnectionManager: VPNConnectionManager {
+    public static func setup(with config: any VPNConnectionConfig) -> (any VPNConnectionManager)? {
+        guard let config = config as? WireGuardConnectionConfig else {
+            print("config isn't valid!")
+            return nil
+        }
+        
+        return WireGuardConnectionManager.getInstance(name: config.name, tunnelIdentifier: config.tunnelIdentifier, appGroup: config.appGroup, clientPrivateKey: config.clientPrivateKey, clientAddress: config.clientAddress, serverPublicKey: config.serverPublicKey, serverAddress: config.serverAddress, serverPort: config.serverPort, dns: config.dns)
+    }
     
     public func connect() {
         var builder: WireGuard.ConfigurationBuilder

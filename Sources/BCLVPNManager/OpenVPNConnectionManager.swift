@@ -13,8 +13,6 @@ import TunnelKitOpenVPNAppExtension
 import NetworkExtension
 
 public typealias OpenVPNTunnelProvider = TunnelKitOpenVPNAppExtension.OpenVPNTunnelProvider
-public typealias VPNStatus = TunnelKitManager.VPNStatus
-public typealias VPNNotification = TunnelKitManager.VPNNotification
 
 public class OpenVPNConnectionManager {
     private static var openVpnConnectionManager: OpenVPNConnectionManager!
@@ -66,11 +64,16 @@ public class OpenVPNConnectionManager {
         let result = try await OpenVPNConnectionManager.vpn.getConnectionDetails()
         return result
     }
-    
-    public func disconnect() {
-        Task {
-            await OpenVPNConnectionManager.vpn.disconnect()
+}
+
+extension OpenVPNConnectionManager: VPNConnectionManager {
+    public static func setup(with config: any VPNConnectionConfig) -> (any VPNConnectionManager)? {
+        guard let config = config as? OpenVPNConnectionConfig else {
+            print("config isn't valid!")
+            return nil
         }
+        
+        return OpenVPNConnectionManager.getInstance(config: config.config, appGroup: config.appGroup, tunnelIdentifier: config.tunnelIdentifier, user: config.username, pass: config.password, name: config.name)
     }
     
     public func connect() {
@@ -106,6 +109,12 @@ public class OpenVPNConnectionManager {
             var extra = NetworkExtensionExtra()
             extra.passwordReference = passwordRef
             try await OpenVPNConnectionManager.vpn.reconnect(tunnelIdentifier, configuration:cfg ,extra: extra, after: .seconds(2))
+        }
+    }
+    
+    public func disconnect() {
+        Task {
+            await OpenVPNConnectionManager.vpn.disconnect()
         }
     }
 }

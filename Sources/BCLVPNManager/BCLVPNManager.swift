@@ -6,60 +6,54 @@
 //
 
 import Foundation
+import TunnelKitManager
 
-enum VPNConnectionType: Int {
+public enum VPNConnectionType: Int {
     case ikev2
     case wireguard
     case openVpn
 }
 
-class BCVPNConnectionConfig {
-    var name: String
-    var remoteIdentifier: String?
-    var serverIp: String?
-    var username: String?
-    var passwordReference: Data?
-    var sharedSecretReference: Data?
-    
-    var config: String?
-    var tunnelIdentifier: String?
-    var appGroup: String?
-    var password: String?
-    
-    var wg_privateKey: String?
-    var wg_addresses: String?
-    var wg_dns: String?
-    var wg_publicKey: String?
-    var wg_allowedIPs: String?
-    var wg_endPoint: String?
-    var wg_port: String?
+public typealias VPNStatus = TunnelKitManager.VPNStatus
+public typealias VPNNotification = TunnelKitManager.VPNNotification
 
-    init(name: String, remoteIdentifier: String, serverIp: String, username: String? = nil, passwordReference: Data? = nil, sharedSecretReference: Data? = nil) {
-        self.name = name
-        self.remoteIdentifier = remoteIdentifier
-        self.serverIp = serverIp
-        self.username = username
-        self.passwordReference = passwordReference
-        self.sharedSecretReference = sharedSecretReference
+public class BCLVPNManager {
+    public let shared = BCLVPNManager()
+    private var vpnConnectionManager: VPNConnectionManager!
+    //public var connectionType: VPNConnectionType
+    public var connectionStatus: VPNStatus {
+        get {
+            getConnectionStatus()
+        }
     }
     
-    init(name: String, wg_privateKey: String, wg_addresses: String, wg_dns: String, wg_publicKey: String, wg_allowedIPs: String, wg_endPoint: String, wg_port: String) {
-        self.name = name
-        self.wg_privateKey = wg_privateKey
-        self.wg_addresses = wg_addresses
-        self.wg_dns = wg_dns
-        self.wg_publicKey = wg_publicKey
-        self.wg_allowedIPs = wg_allowedIPs
-        self.wg_endPoint = wg_endPoint
-        self.wg_port = wg_port
+    private init() {
+        
     }
     
-    init(name: String, username: String? = nil, password: String? = nil, appGroup: String? = nil, tunnelIdentifier: String? = nil, config: String? = nil) {
-        self.name = name
-        self.username = username
-        self.password = password
-        self.appGroup = appGroup
-        self.tunnelIdentifier = tunnelIdentifier
-        self.config = config
+    public func connect() {
+        vpnConnectionManager.connect()
+    }
+    
+    public func disconnect() {
+        vpnConnectionManager.disconnect()
+    }
+    
+    public func setup(with config: VPNConnectionConfig) {
+        if config is IKEv2ConnectionConfig {
+            vpnConnectionManager = IKEv2ConnectionManager.setup(with: config)
+        } else if config is OpenVPNConnectionConfig {
+            vpnConnectionManager = OpenVPNConnectionManager.setup(with: config)!
+        } else if config is WireGuardConnectionConfig {
+            vpnConnectionManager = WireGuardConnectionManager.setup(with: config)
+        }
+    }
+    
+    public func getConnectionStatus() -> VPNStatus {
+        return .disconnected
+    }
+    
+    public func getConnectionInfo() {
+        
     }
 }
