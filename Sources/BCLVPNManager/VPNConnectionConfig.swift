@@ -19,7 +19,7 @@ public class IKEv2ConnectionConfig: VPNConnectionConfig {
     var passwordReference: String
     var sharedSecretReference: String?
     
-    init(name: String, remoteIdentifier: String, serverIp: String, username: String, passwordReference: String, sharedSecretReference: String? = nil) {
+    public init(name: String, remoteIdentifier: String, serverIp: String, username: String, passwordReference: String, sharedSecretReference: String? = nil) {
         self.name = name
         self.remoteIdentifier = remoteIdentifier
         self.serverIp = serverIp
@@ -40,7 +40,7 @@ public class WireGuardConnectionConfig: VPNConnectionConfig {
     let serverPort: String
     let dns: String
     
-    init(name: String,
+    public init(name: String,
          tunnelIdentifier: String,
          appGroup: String,
          clientPrivateKey: String,
@@ -69,7 +69,7 @@ public class OpenVPNConnectionConfig: VPNConnectionConfig {
     var password: String
     var name: String
     
-    init(name: String, username: String, password: String, appGroup: String, tunnelIdentifier: String, config: String) {
+    public init(name: String, username: String, password: String, appGroup: String, tunnelIdentifier: String, config: String) {
         self.name = name
         self.username = username
         self.password = password
