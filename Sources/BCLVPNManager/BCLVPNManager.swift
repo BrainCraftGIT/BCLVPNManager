@@ -18,7 +18,7 @@ public typealias VPNStatus = TunnelKitManager.VPNStatus
 public typealias VPNNotification = TunnelKitManager.VPNNotification
 
 public class BCLVPNManager {
-    public let shared = BCLVPNManager()
+    public static let shared = BCLVPNManager()
     private var vpnConnectionManager: VPNConnectionManager!
     //public var connectionType: VPNConnectionType
     public var connectionStatus: VPNStatus {
