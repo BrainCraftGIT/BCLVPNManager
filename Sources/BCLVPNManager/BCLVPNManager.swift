@@ -28,11 +28,7 @@ public class BCLVPNManager {
     public static let shared = BCLVPNManager()
     private var vpnConnectionManager: VPNConnectionManager!
     //public var connectionType: VPNConnectionType
-    public var connectionStatus: VPNStatus {
-        get {
-            getConnectionStatus()
-        }
-    }
+    public var connectionStatus: VPNStatus = .disconnected
     
     private init() {
         
