@@ -56,11 +56,13 @@ public class BCLVPNManager {
         }
     }
     
-    public func getConnectionStatus() -> VPNStatus {
-        return .disconnected
+    public func getConnectionStatus(completion: @escaping (NEVPNStatus?) -> Void) {
+        vpnConnectionManager.getConnectionDetail { details in
+            completion(details.status)
+        }
     }
     
-    public func getConnectionInfo() {
-        
+    public func getConnectionInfo(completion: @escaping (ConnectionDetails) -> Void) {
+        vpnConnectionManager.getConnectionDetail(completion: completion)
     }
 }
