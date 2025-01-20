@@ -7,11 +7,18 @@
 
 import Foundation
 import TunnelKitManager
+import NetworkExtension
 
 public enum VPNConnectionType: Int {
     case ikev2
     case wireguard
     case openVpn
+}
+
+public struct ConnectionDetails {
+    var status: NEVPNStatus?
+    var localizedDescription: String?
+    var serverAddress: String?
 }
 
 public typealias VPNStatus = TunnelKitManager.VPNStatus

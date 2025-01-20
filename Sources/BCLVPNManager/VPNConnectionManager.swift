@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import NetworkExtension
 
 public protocol VPNConnectionManager {
     func connect()
     func disconnect()
     static func setup(with config: VPNConnectionConfig) -> VPNConnectionManager?
+    func getConnectionDetail(completion: @escaping (ConnectionDetails)->Void)
 }

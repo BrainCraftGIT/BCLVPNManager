@@ -58,15 +58,17 @@ public class OpenVPNConnectionManager {
         self.user = user
         self.pass = pass
         self.name = name
-    }
-    
-    public func getConnectionDetail() async throws -> (status: NEVPNStatus?, localizedDescription: String?, serverAddress: String?) {
-        let result = try await OpenVPNConnectionManager.vpn.getConnectionDetails()
-        return result
-    }
-}
+    }}
 
 extension OpenVPNConnectionManager: VPNConnectionManager {
+    public func getConnectionDetail(completion: @escaping (ConnectionDetails) -> Void) {
+        Task {
+            let result = try await OpenVPNConnectionManager.vpn.getConnectionDetails()
+            let details = ConnectionDetails(status: result.status, localizedDescription: result.localizedDescription, serverAddress: result.serverAddress)
+            completion(details)
+        }
+    }
+    
     public static func setup(with config: any VPNConnectionConfig) -> (any VPNConnectionManager)? {
         guard let config = config as? OpenVPNConnectionConfig else {
             print("config isn't valid!")

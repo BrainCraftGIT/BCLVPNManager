@@ -43,18 +43,15 @@ public class IKEv2ConnectionManager {
         self.password = password
         self.serverAddress = serverAddress
     }
-    
-    public func getConnectionDetail() -> (status: NEVPNStatus?, localizedDescription: String?, serverAddress: String?) {
-        let connection = IKEv2ConnectionManager.vpnManager.connection
-        return (connection.status, connection.manager.localizedDescription, connection.manager.protocolConfiguration?.serverAddress)
-    }
-
-    
 }
 
-
-
 extension IKEv2ConnectionManager: VPNConnectionManager {
+    public func getConnectionDetail(completion: @escaping (ConnectionDetails) -> Void) {
+        let connection = IKEv2ConnectionManager.vpnManager.connection
+        let details = ConnectionDetails(status: connection.status, localizedDescription: connection.manager.localizedDescription, serverAddress: connection.manager.protocolConfiguration?.serverAddress)
+        completion(details)
+    }
+    
     public static func setup(with config: any VPNConnectionConfig) -> (any VPNConnectionManager)? {
         guard let config = config as? IKEv2ConnectionConfig else {
             print("config isn't valid!")
