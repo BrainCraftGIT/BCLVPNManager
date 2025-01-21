@@ -96,7 +96,7 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
                 ikev2Protocol.disconnectOnSleep = false // Change if you want disconnection during sleep
 
                 IKEv2ConnectionManager.vpnManager.protocolConfiguration = ikev2Protocol
-                IKEv2ConnectionManager.vpnManager.localizedDescription = "VPN Pro-IKEv2"
+                IKEv2ConnectionManager.vpnManager.localizedDescription = IKEv2ConnectionManager.vpnName
                 IKEv2ConnectionManager.vpnManager.isEnabled = true
 
                 IKEv2ConnectionManager.vpnManager.saveToPreferences { error in
