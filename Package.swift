@@ -34,7 +34,8 @@ let package = Package(
                 "OpenVPNConnectionManager.swift",
                 "WireGuardConnectionManager.swift",
                 "IKEv2ConnectionManager.swift",
-                "KeychainHelper.swift"
+                "KeychainHelper.swift",
+                "CRSA.swift"
             ],
             resources: []
         )
