@@ -19,29 +19,31 @@ public class IKEv2ConnectionManager {
     private static var sharedSecret: String? = nil
     private static var serverAddress: String = ""
     private static var username: String = ""
+    private static var vpnName: String = ""
     
     private init() {}
 
-    public static func getInstance(serverAddress: String, username: String, password: String, sharedSecret: String?) -> IKEv2ConnectionManager {
+    public static func getInstance(serverAddress: String, username: String, password: String, sharedSecret: String?, vpnName: String) -> IKEv2ConnectionManager {
         if ikev2ConnectionManager == nil {
             ikev2ConnectionManager = IKEv2ConnectionManager()
-            configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecret: sharedSecret)
+            configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecret: sharedSecret, vpnName: vpnName)
         }
         
         return ikev2ConnectionManager
     }
     
-    public static func updateConfig(serverAddress: String, username: String, password: String, sharedSecret: String?) -> IKEv2ConnectionManager {
+    public static func updateConfig(serverAddress: String, username: String, password: String, sharedSecret: String?, vpnName: String) -> IKEv2ConnectionManager {
         ikev2ConnectionManager = IKEv2ConnectionManager()
-        configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecret: sharedSecret)
+        configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecret: sharedSecret, vpnName: vpnName)
         
         return ikev2ConnectionManager
     }
     
-    static func configureIKEv2(serverAddress: String, username: String, password: String, sharedSecret: String?) {
+    static func configureIKEv2(serverAddress: String, username: String, password: String, sharedSecret: String?, vpnName: String) {
         self.username = username
         self.password = password
         self.serverAddress = serverAddress
+        self.vpnName = vpnName
     }
 }
 
@@ -58,7 +60,7 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
             return nil
         }
         
-        return IKEv2ConnectionManager.getInstance(serverAddress: config.serverIp, username: config.username, password: config.passwordReference, sharedSecret: config.sharedSecretReference)
+        return IKEv2ConnectionManager.getInstance(serverAddress: config.serverIp, username: config.username, password: config.passwordReference, sharedSecret: config.sharedSecretReference, vpnName: config.name)
     }
     
     public func connect() {
