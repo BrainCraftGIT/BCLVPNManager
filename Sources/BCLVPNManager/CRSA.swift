@@ -7,10 +7,10 @@
 
 import Foundation
 
-public class CRSA: NSObject {
-    public enum KeyType: Int {
-        case publicKey = 0
-        case privateKey = 1
+public class CRSA {
+    public enum KeyType {
+        case publicKey
+        case privateKey
     }
     
     public func decrypt(encryptedMessage: String, withKeyType keyType: KeyType) -> String {
@@ -49,9 +49,7 @@ public class CRSA: NSObject {
     var privateKey: SecKey?
     var publicKey: SecKey?
     
-    private override init() {
-        super.init()
-        
+    private init() {
         let pemString = loadPEMFile(named: "rsa_public_key")
         let publicKeyData = getKeyData(fromPEM: pemString!)
         publicKey = createPublicKey(from: publicKeyData!)
