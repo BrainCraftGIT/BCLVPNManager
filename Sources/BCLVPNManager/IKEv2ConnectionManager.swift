@@ -15,15 +15,15 @@ private let log = SwiftyBeaver.self
 public class IKEv2ConnectionManager {
     private static var ikev2ConnectionManager: IKEv2ConnectionManager!
     private static let vpnManager = NEVPNManager.shared()
-    private static var password: String = ""
-    private static var sharedSecret: String? = nil
+    private static var password: String? = nil
     private static var serverAddress: String = ""
-    private static var username: String = ""
+    private static var username: String? = nil
+    private static var sharedSecretReference: Data? = nil
     private static var vpnName: String = ""
     
     private init() {}
 
-    public static func getInstance(serverAddress: String, username: String, password: String, sharedSecretReference: Data?, vpnName: String) -> IKEv2ConnectionManager {
+    public static func getInstance(serverAddress: String, username: String?, password: String?, sharedSecretReference: Data?, vpnName: String) -> IKEv2ConnectionManager {
         if ikev2ConnectionManager == nil {
             ikev2ConnectionManager = IKEv2ConnectionManager()
             configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecretReference: sharedSecretReference, vpnName: vpnName)
@@ -32,16 +32,17 @@ public class IKEv2ConnectionManager {
         return ikev2ConnectionManager
     }
     
-    public static func updateConfig(serverAddress: String, username: String, password: String, sharedSecretReference: Data?, vpnName: String) -> IKEv2ConnectionManager {
+    public static func updateConfig(serverAddress: String, username: String?, password: String?, sharedSecretReference: Data?, vpnName: String) -> IKEv2ConnectionManager {
         ikev2ConnectionManager = IKEv2ConnectionManager()
         configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecretReference: sharedSecretReference, vpnName: vpnName)
         
         return ikev2ConnectionManager
     }
     
-    static func configureIKEv2(serverAddress: String, username: String, password: String, sharedSecretReference: Data?, vpnName: String) {
+    static func configureIKEv2(serverAddress: String, username: String?, password: String?, sharedSecretReference: Data?, vpnName: String) {
         self.username = username
         self.password = password
+        self.sharedSecretReference = sharedSecretReference
         self.serverAddress = serverAddress
         self.vpnName = vpnName
     }
@@ -73,16 +74,11 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
                 } else {
                     log.verbose("Failed to save password.")
                 }
-                if KeychainHelper.savePassword(IKEv2ConnectionManager.sharedSecret, account: "ss") {
-                    log.verbose("Password saved.")
-                } else {
-                    log.verbose("Failed to save password.")
-                }
                 
                 let ikev2Protocol = NEVPNProtocolIKEv2()
 
                 // Basic VPN Configuration
-                let sharedSecretReference = KeychainHelper.getPassword(account: "ss")
+                let sharedSecretReference = IKEv2ConnectionManager.sharedSecretReference
                 ikev2Protocol.username = IKEv2ConnectionManager.username
                 ikev2Protocol.passwordReference = KeychainHelper.getPassword(account: "pass")
                 ikev2Protocol.serverAddress = IKEv2ConnectionManager.serverAddress
