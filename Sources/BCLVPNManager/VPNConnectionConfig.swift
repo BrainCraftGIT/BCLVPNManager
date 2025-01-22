@@ -17,9 +17,9 @@ public class IKEv2ConnectionConfig: VPNConnectionConfig {
     var serverIp: String
     var username: String
     var passwordReference: String
-    var sharedSecretReference: String?
+    var sharedSecretReference: Data?
     
-    public init(name: String, remoteIdentifier: String, serverIp: String, username: String, passwordReference: String, sharedSecretReference: String? = nil) {
+    public init(name: String, remoteIdentifier: String, serverIp: String, username: String, passwordReference: String, sharedSecretReference: Data? = nil) {
         self.name = name
         self.remoteIdentifier = remoteIdentifier
         self.serverIp = serverIp
