@@ -24,16 +24,16 @@
         "repositoryURL": "https://github.com/BrainCraftGIT/tunnelkit.git",
         "state": {
           "branch": "expose-tunnelkitmanager",
-          "revision": "b81ee3eef989969837fb21f66d170996962e8dfb",
+          "revision": "c481cfe73aa140a18dd2720e4a5730b3b34a5594",
           "version": null
         }
       },
       {
         "package": "WireGuardKit",
-        "repositoryURL": "https://github.com/passepartoutvpn/wireguard-apple",
+        "repositoryURL": "https://github.com/IkramulMurad-BCL/wireguard-apple.git",
         "state": {
-          "branch": null,
-          "revision": "b79f0f150356d8200a64922ecf041dd020140aa0",
+          "branch": "apply-xcode-16-build-fix",
+          "revision": "d55e408b089ed2add2b617f9389a3ed3c7764a99",
           "version": null
         }
       }
