@@ -20,6 +20,7 @@ public class IKEv2ConnectionManager {
     private static var username: String? = nil
     private static var sharedSecretReference: Data? = nil
     private static var vpnName: String = ""
+    private static let vpn = NetworkExtensionVPN()
     
     private init() {}
 
