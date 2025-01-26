@@ -22,7 +22,31 @@ public class IKEv2ConnectionManager {
     private static var vpnName: String = ""
     private static let vpn = NetworkExtensionVPN()
     
-    private init() {}
+    private init() {
+        NotificationCenter.default.addObserver(self, selector: #selector(vpnDidUpdate(_:)), name: .NEVPNStatusDidChange, object: nil)
+    }
+    
+    @objc private func vpnDidUpdate(_ notification: Notification) {
+        guard let connection = notification.object as? NEVPNConnection else {
+            return
+        }
+        
+        notifyStatus(connection)
+    }
+    
+    private func notifyStatus(_ connection: NEVPNConnection) {
+        guard let _ = connection.manager.localizedDescription else {
+            log.verbose("Ignoring VPN notification from bogus manager")
+            return
+        }
+        
+        log.debug("VPN status did change: isEnabled=\(connection.manager.isEnabled), status=\(connection.status.rawValue)")
+        var notification = Notification(name: VPNNotification.didChangeStatus)
+        notification.vpnIsEnabled = connection.manager.isEnabled
+        notification.vpnStatus = connection.status.wrappedStatus
+        notification.connectionDate = connection.connectedDate
+        NotificationCenter.default.post(notification)
+    }
 
     public static func getInstance(serverAddress: String, username: String?, password: String?, sharedSecretReference: Data?, vpnName: String) -> IKEv2ConnectionManager {
         if ikev2ConnectionManager == nil {
@@ -123,5 +147,26 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
     public func disconnect() {
         IKEv2ConnectionManager.vpnManager.connection.stopVPNTunnel()
         log.verbose("VPN connection stopped.")
+    }
+}
+
+private extension NEVPNStatus {
+    var wrappedStatus: VPNStatus {
+        switch self {
+        case .connected:
+            return .connected
+
+        case .connecting, .reasserting:
+            return .connecting
+
+        case .disconnecting:
+            return .disconnecting
+
+        case .disconnected, .invalid:
+            return .disconnected
+
+        @unknown default:
+            return .disconnected
+        }
     }
 }
