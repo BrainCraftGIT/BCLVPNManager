@@ -28,7 +28,7 @@ public class BCLVPNManager {
     public static let shared = BCLVPNManager()
     private var vpnConnectionManager: VPNConnectionManager!
     //public var connectionType: VPNConnectionType
-    public var connectionStatus: VPNStatus = .disconnected
+    //public var connectionStatus: VPNStatus = .disconnected
     
     private init() {
         
@@ -53,12 +53,63 @@ public class BCLVPNManager {
     }
     
     public func getConnectionStatus(completion: @escaping (NEVPNStatus?) -> Void) {
-        vpnConnectionManager.getConnectionDetail { details in
+        getConnectionDetails { details in
             completion(details.status)
         }
     }
     
     public func getConnectionInfo(completion: @escaping (ConnectionDetails) -> Void) {
-        vpnConnectionManager.getConnectionDetail(completion: completion)
+        getConnectionDetails(completion: completion)
+    }
+    
+    private func getConnectionDetails(completion: @escaping (ConnectionDetails)->Void) {
+        var ikevDetails = ConnectionDetails(status: .invalid, localizedDescription: nil, serverAddress: nil)
+        
+        NEVPNManager.shared().loadFromPreferences { error in
+            let connection = NEVPNManager.shared().connection
+            let status = connection.status
+            let localizedDescription = connection.manager.localizedDescription
+            let serverAddress = connection.manager.protocolConfiguration?.serverAddress
+            ikevDetails = ConnectionDetails(status: status, localizedDescription: localizedDescription, serverAddress: serverAddress)
+            if status == .connected {
+                completion(ikevDetails)
+                return
+            }
+        }
+        
+        NETunnelProviderManager.loadAllFromPreferences { managers, error in
+            guard let managers else {
+                print("managers is nil")
+                completion(ConnectionDetails(status: .invalid, localizedDescription: "No VPN connection found", serverAddress: nil))
+                return
+            }
+            
+            var deviceVpnDetails = ConnectionDetails(status: .invalid, localizedDescription: nil, serverAddress: nil)
+            if let manager = managers.first {
+                let connection = manager.connection
+
+                let status = connection.status
+                let localizedDescription = manager.localizedDescription
+                let serverAddress = manager.protocolConfiguration?.serverAddress
+                deviceVpnDetails = ConnectionDetails(status: status, localizedDescription: localizedDescription, serverAddress: serverAddress)
+            }
+            
+            for manager in managers {
+                let connection = manager.connection
+
+                let status = connection.status
+                let localizedDescription = manager.localizedDescription
+                let serverAddress = manager.protocolConfiguration?.serverAddress
+                
+                if status == .connected {
+                    completion(ConnectionDetails(status: status, localizedDescription: localizedDescription, serverAddress: serverAddress))
+                    return
+                }
+            }
+            
+            completion(deviceVpnDetails)
+        }
+        
+        completion(ikevDetails)
     }
 }
