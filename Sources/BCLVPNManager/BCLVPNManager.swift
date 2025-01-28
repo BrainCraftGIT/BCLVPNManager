@@ -16,9 +16,9 @@ public enum VPNConnectionType: Int {
 }
 
 public struct ConnectionDetails {
-    var status: NEVPNStatus?
-    var localizedDescription: String?
-    var serverAddress: String?
+    public var status: NEVPNStatus?
+    public var localizedDescription: String?
+    public var serverAddress: String?
 }
 
 public typealias VPNStatus = TunnelKitManager.VPNStatus
