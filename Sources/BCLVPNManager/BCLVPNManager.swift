@@ -39,7 +39,30 @@ public class BCLVPNManager {
     }
     
     public func disconnect() {
-        vpnConnectionManager.disconnect()
+        if vpnConnectionManager == nil {
+            NEVPNManager.shared().loadFromPreferences { error in
+                let connection = NEVPNManager.shared().connection
+                let status = connection.status
+                
+                if status == .connected {
+                    connection.stopVPNTunnel()
+                }
+            }
+            
+            NETunnelProviderManager.loadAllFromPreferences() { managers, error in
+                guard let managers else {
+                    return
+                }
+                
+                for manager in managers {
+                    if manager.connection.status == .connected {
+                        manager.connection.stopVPNTunnel()
+                    }
+                }
+            }
+        } else {
+            vpnConnectionManager.disconnect()
+        }
     }
     
     public func setup(with config: VPNConnectionConfig) {
@@ -49,6 +72,48 @@ public class BCLVPNManager {
             vpnConnectionManager = OpenVPNConnectionManager.setup(with: config)!
         } else if config is WireGuardConnectionConfig {
             vpnConnectionManager = WireGuardConnectionManager.setup(with: config)
+        }
+    }
+    
+    func getConnectedVPNManager(completion: @escaping (VPNConnectionManager?) -> Void) {
+        NEVPNManager.shared().loadFromPreferences { error in
+            let connection = NEVPNManager.shared().connection
+            let status = connection.status
+            
+            if status == .connected {
+                let vpnManager = NEVPNManager.shared()
+                let ikevProtocol = vpnManager.protocolConfiguration as! NEVPNProtocolIKEv2
+                let ikevConfig = IKEv2ConnectionConfig(name: vpnManager.localizedDescription!, remoteIdentifier: ikevProtocol.remoteIdentifier!, serverIp: ikevProtocol.serverAddress!, username: ikevProtocol.username, password: String(data: ikevProtocol.passwordReference!, encoding: .utf8), sharedSecretReference: ikevProtocol.sharedSecretReference)
+                let ikevConnectionManager = IKEv2ConnectionManager.setup(with: ikevConfig)
+                completion(ikevConnectionManager)
+                return
+            }
+            
+            NETunnelProviderManager.loadAllFromPreferences() { managers, error in
+                guard let managers else {
+                    completion(nil)
+                    return
+                }
+                
+                for manager in managers {
+                    let status = manager.connection.status
+                    if status == .connected {
+                        let protocolConfig = manager.protocolConfiguration as! NETunnelProviderProtocol
+                        let tunnelIdentifier = protocolConfig.providerBundleIdentifier!
+                        if tunnelIdentifier.lowercased().contains("openvpn") {
+                            let ovpnConfig = OpenVPNConnectionConfig(name: "", username: "", password: "", appGroup: "", tunnelIdentifier: "", config: "")
+                            let ovpnManager = OpenVPNConnectionManager.setup(with: ovpnConfig)
+                            completion(ovpnManager)
+                        } else {
+                            let wgConfig = WireGuardConnectionConfig(name: "", tunnelIdentifier: "", appGroup: "", clientPrivateKey: "", clientAddress: "", serverPublicKey: "", serverAddress: "", serverPort: "", dns: "")
+                            let wgManager = WireGuardConnectionManager.setup(with: wgConfig)
+                            completion(wgManager)
+                        }
+                    }
+                }
+                
+                completion(nil)
+            }
         }
     }
     
