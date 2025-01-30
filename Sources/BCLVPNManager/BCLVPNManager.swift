@@ -22,7 +22,7 @@ public struct ConnectionDetails {
 }
 
 public typealias VPNStatus = TunnelKitManager.VPNStatus
-public typealias VPNNotification = TunnelKitManager.VPNNotification
+//public typealias VPNNotification = TunnelKitManager.VPNNotification
 
 public class BCLVPNManager {
     public static let shared = BCLVPNManager()
@@ -179,5 +179,4 @@ public class BCLVPNManager {
             }
         }
     }
-
 }

@@ -29,6 +29,7 @@ let package = Package(
             exclude: [],
             sources: [
                 "BCLVPNManager.swift",
+                "BCLVPNNotification.swift",
                 "VPNConnectionConfig.swift",
                 "VPNConnectionManager.swift",
                 "OpenVPNConnectionManager.swift",
