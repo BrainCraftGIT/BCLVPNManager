@@ -37,21 +37,21 @@ public class BCLVPNNotification {
     
     private func notifyStatus(_ connection: NEVPNConnection) {
         guard let _ = connection.manager.localizedDescription else {
-            log.verbose("Ignoring VPN notification from bogus manager")
+            log.verbose("Ignoring VPN notification from invalid manager")
             return
         }
         
         log.debug("VPN status did change: isEnabled=\(connection.manager.isEnabled), status=\(connection.status.rawValue)")
         var notification = Notification(name: BCLVPNNotification.statusDidChangeNotification)
-        notification.vpnIsEnabled = connection.manager.isEnabled
         notification.vpnStatus = connection.status.wrappedStatus
-        notification.connectionDate = connection.connectedDate
+        notification.localizedDescription = connection.manager.localizedDescription!
+        notification.serverIp = connection.manager.protocolConfiguration!.serverAddress!
         NotificationCenter.default.post(notification)
     }
     
     private func notifyStatus(_ connection: NETunnelProviderSession) {
         guard let _ = connection.manager.localizedDescription else {
-            log.verbose("Ignoring VPN notification from bogus manager")
+            log.verbose("Ignoring VPN notification from invalid manager")
             return
         }
         
@@ -62,10 +62,68 @@ public class BCLVPNNotification {
         log.debug("VPN status did change (\(bundleId)): isEnabled=\(connection.manager.isEnabled), status=\(connection.status.rawValue)")
         var notification = Notification(name: BCLVPNNotification.statusDidChangeNotification)
         notification.vpnBundleIdentifier = bundleId
-        notification.vpnIsEnabled = connection.manager.isEnabled
         notification.vpnStatus = connection.status.wrappedStatus
-        notification.connectionDate = connection.connectedDate
+        notification.localizedDescription = connection.manager.localizedDescription!
+        notification.serverIp = protocolConfig!.serverAddress!
         NotificationCenter.default.post(notification)
+    }
+}
+
+extension Notification {
+    public var vpnBundleIdentifier: String? {
+        get {
+            guard let vpnBundleIdentifier = userInfo?["BundleIdentifier"] as? String else {
+                fatalError("Notification has no vpnBundleIdentifier")
+            }
+            return vpnBundleIdentifier
+        }
+        set {
+            var newInfo = userInfo ?? [:]
+            newInfo["BundleIdentifier"] = newValue
+            userInfo = newInfo
+        }
+    }
+    
+    public var vpnStatus: VPNStatus {
+        get {
+            guard let vpnStatus = userInfo?["Status"] as? VPNStatus else {
+                fatalError("Notification has no vpnStatus")
+            }
+            return vpnStatus
+        }
+        set {
+            var newInfo = userInfo ?? [:]
+            newInfo["Status"] = newValue
+            userInfo = newInfo
+        }
+    }
+    
+    public var localizedDescription: String {
+        get {
+            guard let localizedDescription = userInfo?["localizedDescription"] as? String else {
+                fatalError("Notification has no localizedDescription")
+            }
+            return localizedDescription
+        }
+        set {
+            var newInfo = userInfo ?? [:]
+            newInfo["localizedDescription"] = newValue
+            userInfo = newInfo
+        }
+    }
+    
+    public var serverIp: String {
+        get {
+            guard let serverIp = userInfo?["ServerIp"] as? String else {
+                fatalError("Notification has no serverIp")
+            }
+            return serverIp
+        }
+        set {
+            var newInfo = userInfo ?? [:]
+            newInfo["ServerIp"] = newValue
+            userInfo = newInfo
+        }
     }
 }
 
