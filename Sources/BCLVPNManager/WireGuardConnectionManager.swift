@@ -133,7 +133,11 @@ extension WireGuardConnectionManager: VPNConnectionManager {
         let providerCfg = WireGuard.ProviderConfiguration(name, appGroup: appGroup, configuration: cfg)
 
         Task {
-            let extra = NetworkExtensionExtra()
+            var extra = NetworkExtensionExtra()
+            
+            let rule = NEOnDemandRuleConnect()
+            rule.interfaceTypeMatch = .wiFi
+            extra.onDemandRules = [rule]
             try await WireGuardConnectionManager.vpn.reconnect(
                 tunnelIdentifier,
                 configuration: providerCfg,

@@ -102,6 +102,9 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
                 IKEv2ConnectionManager.vpnManager.protocolConfiguration = ikev2Protocol
                 IKEv2ConnectionManager.vpnManager.localizedDescription = IKEv2ConnectionManager.vpnName
                 IKEv2ConnectionManager.vpnManager.isEnabled = true
+                
+                IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = true
+                IKEv2ConnectionManager.vpnManager.onDemandRules = [NEOnDemandRule]()
 
                 IKEv2ConnectionManager.vpnManager.saveToPreferences { error in
                     if let error = error {
