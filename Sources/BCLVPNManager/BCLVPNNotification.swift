@@ -46,6 +46,7 @@ public class BCLVPNNotification {
         notification.vpnStatus = connection.status.wrappedStatus
         notification.localizedDescription = connection.manager.localizedDescription!
         notification.serverIp = connection.manager.protocolConfiguration!.serverAddress!
+        notification.vpnIsEnabled = connection.manager.isEnabled
         NotificationCenter.default.post(notification)
     }
     
@@ -65,6 +66,7 @@ public class BCLVPNNotification {
         notification.vpnStatus = connection.status.wrappedStatus
         notification.localizedDescription = connection.manager.localizedDescription!
         notification.serverIp = protocolConfig!.serverAddress!
+        notification.vpnIsEnabled = connection.manager.isEnabled
         NotificationCenter.default.post(notification)
     }
 }
@@ -122,6 +124,20 @@ extension Notification {
         set {
             var newInfo = userInfo ?? [:]
             newInfo["ServerIp"] = newValue
+            userInfo = newInfo
+        }
+    }
+    
+    public var vpnIsEnabled: Bool {
+        get {
+            guard let vpnIsEnabled = userInfo?["IsEnabled"] as? Bool else {
+                fatalError("Notification has no vpnIsEnabled")
+            }
+            return vpnIsEnabled
+        }
+        set {
+            var newInfo = userInfo ?? [:]
+            newInfo["IsEnabled"] = newValue
             userInfo = newInfo
         }
     }
