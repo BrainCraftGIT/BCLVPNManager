@@ -92,14 +92,6 @@ public class WireGuardConnectionManager {
 }
 
 extension WireGuardConnectionManager: VPNConnectionManager {
-    public func getConnectionDetail(completion: @escaping (ConnectionDetails) -> Void) {
-        Task {
-            let result = try await WireGuardConnectionManager.vpn.getConnectionDetails()
-            let details = ConnectionDetails(status: result.status, localizedDescription: result.localizedDescription, serverAddress: result.serverAddress)
-            completion(details)
-        }
-    }
-    
     public static func setup(with config: any VPNConnectionConfig) -> (any VPNConnectionManager)? {
         guard let config = config as? WireGuardConnectionConfig else {
             print("config isn't valid!")

@@ -16,7 +16,7 @@ public enum VPNConnectionType: Int {
 }
 
 public struct ConnectionDetails {
-    public var status: NEVPNStatus?
+    public var status: VPNStatus?
     public var localizedDescription: String?
     public var serverAddress: String?
 }
@@ -117,7 +117,7 @@ public class BCLVPNManager {
         }
     }
     
-    public func getConnectionStatus(completion: @escaping (NEVPNStatus?) -> Void) {
+    public func getConnectionStatus(completion: @escaping (VPNStatus?) -> Void) {
         getConnectionDetails { details in
             completion(details.status)
         }
@@ -132,7 +132,7 @@ public class BCLVPNManager {
         
         NEVPNManager.shared().loadFromPreferences { error in
             let connection = NEVPNManager.shared().connection
-            let status = connection.status
+            let status = connection.status.wrappedStatus
             let localizedDescription = connection.manager.localizedDescription
             let serverAddress = connection.manager.protocolConfiguration?.serverAddress
             ikevDetails = ConnectionDetails(status: status, localizedDescription: localizedDescription, serverAddress: serverAddress)
@@ -144,7 +144,7 @@ public class BCLVPNManager {
             
             NETunnelProviderManager.loadAllFromPreferences { managers, error in
                 guard let managers else {
-                    completion(ikevDetails ?? ConnectionDetails(status: .invalid, localizedDescription: nil, serverAddress: nil))
+                    completion(ikevDetails ?? ConnectionDetails(status: .disconnected, localizedDescription: nil, serverAddress: nil))
                     return
                 }
                 
@@ -152,7 +152,7 @@ public class BCLVPNManager {
                 if let manager = managers.first {
                     let connection = manager.connection
                     
-                    let status = connection.status
+                    let status = connection.status.wrappedStatus
                     let localizedDescription = manager.localizedDescription
                     let serverAddress = manager.protocolConfiguration?.serverAddress
                     deviceVpnDetails = ConnectionDetails(status: status, localizedDescription: localizedDescription, serverAddress: serverAddress)
@@ -160,7 +160,7 @@ public class BCLVPNManager {
                 
                 for manager in managers {
                     let connection = manager.connection
-                    let status = connection.status
+                    let status = connection.status.wrappedStatus
                     let localizedDescription = manager.localizedDescription
                     let serverAddress = manager.protocolConfiguration?.serverAddress
                     let vpnDetails = ConnectionDetails(status: status, localizedDescription: localizedDescription, serverAddress: serverAddress)
@@ -172,7 +172,7 @@ public class BCLVPNManager {
                 }
                 
                 guard let deviceVpnDetails else {
-                    completion(ikevDetails ?? ConnectionDetails(status: .invalid, localizedDescription: nil, serverAddress: nil))
+                    completion(ikevDetails ?? ConnectionDetails(status: .disconnected, localizedDescription: nil, serverAddress: nil))
                     return
                 }
                 completion(deviceVpnDetails)
