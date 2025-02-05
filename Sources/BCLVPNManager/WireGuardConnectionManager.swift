@@ -128,7 +128,7 @@ extension WireGuardConnectionManager: VPNConnectionManager {
             var extra = NetworkExtensionExtra()
             
             let rule = NEOnDemandRuleConnect()
-            rule.interfaceTypeMatch = .wiFi
+            rule.interfaceTypeMatch = .any
             extra.onDemandRules = [rule]
             try await WireGuardConnectionManager.vpn.reconnect(
                 tunnelIdentifier,

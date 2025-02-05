@@ -103,7 +103,7 @@ extension OpenVPNConnectionManager: VPNConnectionManager {
             var extra = NetworkExtensionExtra()
             
             let rule = NEOnDemandRuleConnect()
-            rule.interfaceTypeMatch = .wiFi
+            rule.interfaceTypeMatch = .any
             extra.onDemandRules = [rule]
             extra.passwordReference = passwordRef
             try await OpenVPNConnectionManager.vpn.reconnect(tunnelIdentifier, configuration:cfg ,extra: extra, after: .seconds(2))
