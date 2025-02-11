@@ -102,20 +102,20 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
 
                 IKEv2ConnectionManager.vpnManager.saveToPreferences { error in
                     if let error = error {
-                        log.verbose("Failed to save VPN configuration: \(error.localizedDescription)")
+                        print("Failed to save VPN configuration: \(error.localizedDescription)")
                     } else {
-                        log.verbose("VPN configuration saved successfully.")
+                        print("VPN configuration saved successfully.")
                         IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
                             if let error = error {
-                                log.verbose("Failed to load VPN preferences: \(error.localizedDescription)")
+                                print("Failed to load VPN preferences: \(error.localizedDescription)")
                                 return
                             }
 
                             do {
                                 try IKEv2ConnectionManager.vpnManager.connection.startVPNTunnel()
-                                log.verbose("VPN connection started.")
+                                print("VPN connection started.")
                             } catch {
-                                log.verbose("Failed to start VPN connection: \(error.localizedDescription)")
+                                print("Failed to start VPN connection: \(error.localizedDescription)")
                             }
                         }
                     }
