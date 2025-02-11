@@ -111,11 +111,25 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
                                 return
                             }
 
-                            do {
-                                try IKEv2ConnectionManager.vpnManager.connection.startVPNTunnel()
-                                print("VPN connection started.")
-                            } catch {
-                                print("Failed to start VPN connection: \(error.localizedDescription)")
+                            IKEv2ConnectionManager.vpnManager.saveToPreferences { error in
+                                if let error = error {
+                                    print("Failed to save VPN configuration: \(error.localizedDescription)")
+                                } else {
+                                    print("VPN configuration saved successfully twice.")
+                                    IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
+                                        if let error = error {
+                                            print("Failed to load VPN preferences: \(error.localizedDescription)")
+                                            return
+                                        }
+                                        
+                                        do {
+                                            try IKEv2ConnectionManager.vpnManager.connection.startVPNTunnel()
+                                            print("VPN connection started.")
+                                        } catch {
+                                            print("Failed to start VPN connection: \(error.localizedDescription)")
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
