@@ -98,7 +98,9 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
                 IKEv2ConnectionManager.vpnManager.isEnabled = true
                 
                 IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = true
-                IKEv2ConnectionManager.vpnManager.onDemandRules = [NEOnDemandRule]()
+                let rule = NEOnDemandRuleConnect()
+                rule.interfaceTypeMatch = .any
+                IKEv2ConnectionManager.vpnManager.onDemandRules = [rule]
 
                 IKEv2ConnectionManager.vpnManager.saveToPreferences { error in
                     if let error = error {
