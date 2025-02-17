@@ -45,8 +45,17 @@ public class BCLVPNManager {
                 let status = connection.status
                 
                 if status == .connected {
-                    connection.manager.isOnDemandEnabled = false
                     connection.stopVPNTunnel()
+                    
+                    connection.manager.onDemandRules = []
+                    connection.manager.isOnDemandEnabled = false
+                    connection.manager.saveToPreferences { error in
+                        guard error == nil else {
+                            print("Error saving preferences: \(error!)")
+                            return
+                        }
+                        print("VPN configuration updated successfully")
+                    }
                 }
             }
             
@@ -57,8 +66,17 @@ public class BCLVPNManager {
                 
                 for manager in managers {
                     if manager.connection.status == .connected {
-                        manager.isOnDemandEnabled = false
                         manager.connection.stopVPNTunnel()
+                        
+                        //manager.onDemandRules = []
+                        manager.isOnDemandEnabled = false
+                        manager.saveToPreferences { error in
+                            guard error == nil else {
+                                print("Error saving preferences: \(error!)")
+                                return
+                            }
+                            print("VPN configuration updated successfully")
+                        }
                     }
                 }
             }
