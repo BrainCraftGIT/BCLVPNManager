@@ -147,8 +147,27 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
     }
 
     public func disconnect() {
-        IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = false
         IKEv2ConnectionManager.vpnManager.connection.stopVPNTunnel()
+        
+        IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
+            guard error == nil else {
+                print("Error loading preferences: \(error!)")
+                return
+            }
+            
+            let manager = IKEv2ConnectionManager.vpnManager
+            manager.onDemandRules = [] // Clear on-demand rules
+            manager.isOnDemandEnabled = false
+            
+            manager.saveToPreferences { error in
+                guard error == nil else {
+                    print("Error saving preferences: \(error!)")
+                    return
+                }
+                print("VPN configuration updated successfully")
+            }
+        }
+        
         log.verbose("VPN connection stopped.")
     }
 }
