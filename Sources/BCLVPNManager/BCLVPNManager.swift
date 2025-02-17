@@ -45,6 +45,7 @@ public class BCLVPNManager {
                 let status = connection.status
                 
                 if status == .connected {
+                    connection.manager.isOnDemandEnabled = false
                     connection.stopVPNTunnel()
                 }
             }
@@ -56,6 +57,7 @@ public class BCLVPNManager {
                 
                 for manager in managers {
                     if manager.connection.status == .connected {
+                        manager.isOnDemandEnabled = false
                         manager.connection.stopVPNTunnel()
                     }
                 }
