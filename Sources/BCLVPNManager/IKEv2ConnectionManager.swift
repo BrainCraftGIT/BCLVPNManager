@@ -106,22 +106,26 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
                 IKEv2ConnectionManager.vpnManager.saveToPreferences { error in
                     if let error = error {
                         print("Failed to save VPN configuration: \(error.localizedDescription)")
+                        IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = false
                     } else {
                         print("VPN configuration saved successfully.")
                         IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
                             if let error = error {
                                 print("Failed to load VPN preferences: \(error.localizedDescription)")
+                                IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = false
                                 return
                             }
 
                             IKEv2ConnectionManager.vpnManager.saveToPreferences { error in
                                 if let error = error {
                                     print("Failed to save VPN configuration: \(error.localizedDescription)")
+                                    IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = false
                                 } else {
                                     print("VPN configuration saved successfully twice.")
                                     IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
                                         if let error = error {
                                             print("Failed to load VPN preferences: \(error.localizedDescription)")
+                                            IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = false
                                             return
                                         }
                                         
@@ -130,6 +134,7 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
                                             print("VPN connection started.")
                                         } catch {
                                             print("Failed to start VPN connection: \(error.localizedDescription)")
+                                            IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = false
                                         }
                                     }
                                 }
@@ -142,6 +147,7 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
     }
 
     public func disconnect() {
+        IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = false
         IKEv2ConnectionManager.vpnManager.connection.stopVPNTunnel()
         log.verbose("VPN connection stopped.")
     }
