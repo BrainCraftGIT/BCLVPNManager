@@ -20,39 +20,35 @@ public class IKEv2ConnectionManager {
     private static var username: String? = nil
     private static var sharedSecretReference: Data? = nil
     private static var vpnName: String = ""
+    private static var onDemandRules: [NEOnDemandRule] = []
     
     private init() {
         
     }
-    
-    @objc private func vpnDidUpdate(_ notification: Notification) {
-        
-    }
-    
-    
 
-    public static func getInstance(serverAddress: String, username: String?, password: String?, sharedSecretReference: Data?, vpnName: String) -> IKEv2ConnectionManager {
+    public static func getInstance(serverAddress: String, username: String?, password: String?, sharedSecretReference: Data?, vpnName: String, onDemandRules: [NEOnDemandRule]) -> IKEv2ConnectionManager {
         if ikev2ConnectionManager == nil {
             ikev2ConnectionManager = IKEv2ConnectionManager()
-            configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecretReference: sharedSecretReference, vpnName: vpnName)
+            configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecretReference: sharedSecretReference, vpnName: vpnName, onDemandRules: onDemandRules)
         }
         
         return ikev2ConnectionManager
     }
     
-    public static func updateConfig(serverAddress: String, username: String?, password: String?, sharedSecretReference: Data?, vpnName: String) -> IKEv2ConnectionManager {
+    public static func updateConfig(serverAddress: String, username: String?, password: String?, sharedSecretReference: Data?, vpnName: String, onDemandRules: [NEOnDemandRule]) -> IKEv2ConnectionManager {
         ikev2ConnectionManager = IKEv2ConnectionManager()
-        configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecretReference: sharedSecretReference, vpnName: vpnName)
+        configureIKEv2(serverAddress: serverAddress, username: username, password: password, sharedSecretReference: sharedSecretReference, vpnName: vpnName, onDemandRules: onDemandRules)
         
         return ikev2ConnectionManager
     }
     
-    static func configureIKEv2(serverAddress: String, username: String?, password: String?, sharedSecretReference: Data?, vpnName: String) {
+    static func configureIKEv2(serverAddress: String, username: String?, password: String?, sharedSecretReference: Data?, vpnName: String, onDemandRules: [NEOnDemandRule]) {
         self.username = username
         self.password = password
         self.sharedSecretReference = sharedSecretReference
         self.serverAddress = serverAddress
         self.vpnName = vpnName
+        self.onDemandRules = onDemandRules
     }
 }
 
@@ -63,7 +59,7 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
             return nil
         }
         
-        return IKEv2ConnectionManager.getInstance(serverAddress: config.serverIp, username: config.username, password: config.password, sharedSecretReference: config.sharedSecretReference, vpnName: config.name)
+        return IKEv2ConnectionManager.getInstance(serverAddress: config.serverIp, username: config.username, password: config.password, sharedSecretReference: config.sharedSecretReference, vpnName: config.name, onDemandRules: config.onDemandRules)
     }
     
     public func connect() {
@@ -98,9 +94,14 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
                 IKEv2ConnectionManager.vpnManager.isEnabled = true
                 
                 IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = true
-                let rule = NEOnDemandRuleConnect()
-                rule.interfaceTypeMatch = .any
-                IKEv2ConnectionManager.vpnManager.onDemandRules = [rule]
+                
+                if IKEv2ConnectionManager.onDemandRules.isEmpty {
+                    let rule = NEOnDemandRuleConnect()
+                    rule.interfaceTypeMatch = .any
+                    IKEv2ConnectionManager.onDemandRules.append(rule)
+                }
+                
+                IKEv2ConnectionManager.vpnManager.onDemandRules = IKEv2ConnectionManager.onDemandRules
 
                 IKEv2ConnectionManager.vpnManager.saveToPreferences { error in
                     if let error = error {

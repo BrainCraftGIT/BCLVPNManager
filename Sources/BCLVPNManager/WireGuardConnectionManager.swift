@@ -29,6 +29,7 @@ public class WireGuardConnectionManager {
     let serverAddress: String
     let serverPort: String
     let dns: String
+    var onDemandRules: [NEOnDemandRule]
     
     static var vpnStatus : VPNStatus = .disconnected
     
@@ -40,9 +41,10 @@ public class WireGuardConnectionManager {
                                    serverPublicKey: String,
                                    serverAddress: String,
                                    serverPort: String,
-                                   dns: String) -> WireGuardConnectionManager {
+                                   dns: String,
+                                   onDemandRules: [NEOnDemandRule]) -> WireGuardConnectionManager {
         if wireguardConnectionManager == nil {
-            wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort, dns: dns)
+            wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort, dns: dns, onDemandRules: onDemandRules)
             
             Task {
                 await vpn.prepare()
@@ -60,8 +62,9 @@ public class WireGuardConnectionManager {
                                     serverPublicKey: String,
                                     serverAddress: String,
                                     serverPort: String,
-                                    dns: String) -> WireGuardConnectionManager {
-        wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort, dns: dns)
+                                    dns: String,
+                                    onDemandRules: [NEOnDemandRule]) -> WireGuardConnectionManager {
+        wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort, dns: dns, onDemandRules: onDemandRules)
         
         Task {
             await vpn.prepare()
@@ -78,7 +81,8 @@ public class WireGuardConnectionManager {
                  serverPublicKey: String,
                  serverAddress: String,
                  serverPort: String,
-                 dns: String) {
+                 dns: String,
+                 onDemandRules: [NEOnDemandRule]) {
         self.name = name
         self.tunnelIdentifier = tunnelIdentifier
         self.appGroup = appGroup
@@ -88,6 +92,7 @@ public class WireGuardConnectionManager {
         self.serverAddress = serverAddress
         self.serverPort = serverPort
         self.dns = dns
+        self.onDemandRules = onDemandRules
     }
 }
 
@@ -98,7 +103,7 @@ extension WireGuardConnectionManager: VPNConnectionManager {
             return nil
         }
         
-        return WireGuardConnectionManager.getInstance(name: config.name, tunnelIdentifier: config.tunnelIdentifier, appGroup: config.appGroup, clientPrivateKey: config.clientPrivateKey, clientAddress: config.clientAddress, serverPublicKey: config.serverPublicKey, serverAddress: config.serverAddress, serverPort: config.serverPort, dns: config.dns)
+        return WireGuardConnectionManager.getInstance(name: config.name, tunnelIdentifier: config.tunnelIdentifier, appGroup: config.appGroup, clientPrivateKey: config.clientPrivateKey, clientAddress: config.clientAddress, serverPublicKey: config.serverPublicKey, serverAddress: config.serverAddress, serverPort: config.serverPort, dns: config.dns, onDemandRules: config.onDemandRules)
     }
     
     public func connect() {
@@ -127,9 +132,13 @@ extension WireGuardConnectionManager: VPNConnectionManager {
         Task {
             var extra = NetworkExtensionExtra()
             
-            let rule = NEOnDemandRuleConnect()
-            rule.interfaceTypeMatch = .any
-            extra.onDemandRules = [rule]
+            if self.onDemandRules.isEmpty {
+                let rule = NEOnDemandRuleConnect()
+                rule.interfaceTypeMatch = .any
+                self.onDemandRules.append(rule)
+            }
+            
+            extra.onDemandRules = self.onDemandRules
             try await WireGuardConnectionManager.vpn.reconnect(
                 tunnelIdentifier,
                 configuration: providerCfg,

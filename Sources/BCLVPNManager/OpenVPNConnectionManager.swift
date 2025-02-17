@@ -23,15 +23,16 @@ public class OpenVPNConnectionManager {
     var user: String
     var pass: String
     var name: String
+    var onDemandRules: [NEOnDemandRule]
     
     private static let vpn = NetworkExtensionVPN()
     private static var cfg: OpenVPN.ProviderConfiguration?
     
     static var vpnStatus : VPNStatus = .disconnected
     
-    public static func getInstance(config: String, appGroup: String, tunnelIdentifier: String, user: String, pass: String, name: String) -> OpenVPNConnectionManager {
+    public static func getInstance(config: String, appGroup: String, tunnelIdentifier: String, user: String, pass: String, name: String, onDemandRules: [NEOnDemandRule]) -> OpenVPNConnectionManager {
         if openVpnConnectionManager == nil {
-            openVpnConnectionManager = OpenVPNConnectionManager(config: config, appGroup: appGroup, tunnelIdentifier: tunnelIdentifier, user: user, pass: pass, name: name)
+            openVpnConnectionManager = OpenVPNConnectionManager(config: config, appGroup: appGroup, tunnelIdentifier: tunnelIdentifier, user: user, pass: pass, name: name, onDemandRules: onDemandRules)
             
             Task {
                 await vpn.prepare()
@@ -41,8 +42,8 @@ public class OpenVPNConnectionManager {
         return openVpnConnectionManager
     }
     
-    public static func updateConfig(config: String, appGroup: String, tunnelIdentifier: String, user: String, pass: String, name: String) -> OpenVPNConnectionManager {
-        openVpnConnectionManager = OpenVPNConnectionManager(config: config, appGroup: appGroup, tunnelIdentifier: tunnelIdentifier, user: user, pass: pass, name: name)
+    public static func updateConfig(config: String, appGroup: String, tunnelIdentifier: String, user: String, pass: String, name: String, onDemandRules: [NEOnDemandRule]) -> OpenVPNConnectionManager {
+        openVpnConnectionManager = OpenVPNConnectionManager(config: config, appGroup: appGroup, tunnelIdentifier: tunnelIdentifier, user: user, pass: pass, name: name, onDemandRules: onDemandRules)
         
         Task {
             await vpn.prepare()
@@ -51,14 +52,16 @@ public class OpenVPNConnectionManager {
         return openVpnConnectionManager
     }
     
-    private init(config: String, appGroup: String, tunnelIdentifier: String, user: String, pass: String, name: String) {
+    private init(config: String, appGroup: String, tunnelIdentifier: String, user: String, pass: String, name: String, onDemandRules: [NEOnDemandRule]) {
         self.config = config
         self.appGroup = appGroup
         self.tunnelIdentifier = tunnelIdentifier
         self.user = user
         self.pass = pass
         self.name = name
-    }}
+        self.onDemandRules = onDemandRules
+    }
+}
 
 extension OpenVPNConnectionManager: VPNConnectionManager {
     public static func setup(with config: any VPNConnectionConfig) -> (any VPNConnectionManager)? {
@@ -67,7 +70,7 @@ extension OpenVPNConnectionManager: VPNConnectionManager {
             return nil
         }
         
-        return OpenVPNConnectionManager.getInstance(config: config.config, appGroup: config.appGroup, tunnelIdentifier: config.tunnelIdentifier, user: config.username, pass: config.password, name: config.name)
+        return OpenVPNConnectionManager.getInstance(config: config.config, appGroup: config.appGroup, tunnelIdentifier: config.tunnelIdentifier, user: config.username, pass: config.password, name: config.name, onDemandRules: config.onDemandRules)
     }
     
     public func connect() {
@@ -102,9 +105,13 @@ extension OpenVPNConnectionManager: VPNConnectionManager {
         Task {
             var extra = NetworkExtensionExtra()
             
-            let rule = NEOnDemandRuleConnect()
-            rule.interfaceTypeMatch = .any
-            extra.onDemandRules = [rule]
+            if self.onDemandRules.isEmpty {
+                let rule = NEOnDemandRuleConnect()
+                rule.interfaceTypeMatch = .any
+                self.onDemandRules.append(rule)
+            }
+            
+            extra.onDemandRules = self.onDemandRules
             extra.passwordReference = passwordRef
             try await OpenVPNConnectionManager.vpn.reconnect(tunnelIdentifier, configuration:cfg ,extra: extra, after: .seconds(2))
         }
