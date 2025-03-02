@@ -70,7 +70,7 @@ extension OpenVPNConnectionManager: VPNConnectionManager {
             return nil
         }
         
-        return OpenVPNConnectionManager.getInstance(config: config.config, appGroup: config.appGroup, tunnelIdentifier: config.tunnelIdentifier, user: config.username, pass: config.password, name: config.name, onDemandRules: config.onDemandRules)
+        return OpenVPNConnectionManager.updateConfig(config: config.config, appGroup: config.appGroup, tunnelIdentifier: config.tunnelIdentifier, user: config.username, pass: config.password, name: config.name, onDemandRules: config.onDemandRules)
     }
     
     public func connect() {
