@@ -59,7 +59,7 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
             return nil
         }
         
-        return IKEv2ConnectionManager.getInstance(serverAddress: config.serverIp, username: config.username, password: config.password, sharedSecretReference: config.sharedSecretReference, vpnName: config.name, onDemandRules: config.onDemandRules)
+        return IKEv2ConnectionManager.updateConfig(serverAddress: config.serverIp, username: config.username, password: config.password, sharedSecretReference: config.sharedSecretReference, vpnName: config.name, onDemandRules: config.onDemandRules)
     }
     
     public func connect() {
