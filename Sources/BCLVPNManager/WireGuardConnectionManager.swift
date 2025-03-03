@@ -103,7 +103,7 @@ extension WireGuardConnectionManager: VPNConnectionManager {
             return nil
         }
         
-        return WireGuardConnectionManager.getInstance(name: config.name, tunnelIdentifier: config.tunnelIdentifier, appGroup: config.appGroup, clientPrivateKey: config.clientPrivateKey, clientAddress: config.clientAddress, serverPublicKey: config.serverPublicKey, serverAddress: config.serverAddress, serverPort: config.serverPort, dns: config.dns, onDemandRules: config.onDemandRules)
+        return WireGuardConnectionManager.updateConfig(name: config.name, tunnelIdentifier: config.tunnelIdentifier, appGroup: config.appGroup, clientPrivateKey: config.clientPrivateKey, clientAddress: config.clientAddress, serverPublicKey: config.serverPublicKey, serverAddress: config.serverAddress, serverPort: config.serverPort, dns: config.dns, onDemandRules: config.onDemandRules)
     }
     
     public func connect() {
