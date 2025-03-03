@@ -24,15 +24,16 @@ public class BCLVPNNotification {
     }
     
     @objc private func vpnStatusDidChange(_ notification: Notification) {
-        guard let connection = notification.object as? NETunnelProviderSession else {
-            guard let connection = notification.object as? NEVPNConnection else {
-                return
-            }
-            
-            notifyStatus(connection)
-            return
-        }
-        notifyStatus(connection)
+//        guard let connection = notification.object as? NETunnelProviderSession else {
+//            guard let connection = notification.object as? NEVPNConnection else {
+//                return
+//            }
+//            
+//            notifyStatus(connection)
+//            return
+//        }
+//        notifyStatus(connection)
+        NotificationCenter.default.post(notification)
     }
     
     private func notifyStatus(_ connection: NEVPNConnection) {
