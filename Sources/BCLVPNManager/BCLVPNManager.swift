@@ -9,6 +9,12 @@ import Foundation
 import TunnelKitManager
 import NetworkExtension
 
+public enum VPNRequest: Int {
+    case connect
+    case disconnect
+    case none
+}
+
 public enum VPNConnectionType: Int {
     case ikev2
     case wireguard
@@ -24,6 +30,8 @@ public struct ConnectionDetails {
 public typealias VPNStatus = TunnelKitManager.VPNStatus
 //public typealias VPNNotification = TunnelKitManager.VPNNotification
 
+var currentVPNRequest: VPNRequest = .none
+
 public class BCLVPNManager {
     public static let shared = BCLVPNManager()
     private var vpnConnectionManager: VPNConnectionManager!
@@ -35,10 +43,12 @@ public class BCLVPNManager {
     }
     
     public func connect() {
+        currentVPNRequest = .connect
         vpnConnectionManager.connect()
     }
     
     public func disconnect() {
+        currentVPNRequest = .disconnect
         if vpnConnectionManager == nil {
             NEVPNManager.shared().loadFromPreferences { error in
                 let connection = NEVPNManager.shared().connection

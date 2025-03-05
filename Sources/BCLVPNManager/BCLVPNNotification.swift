@@ -48,6 +48,11 @@ public class BCLVPNNotification {
         notification.localizedDescription = connection.manager.localizedDescription!
         notification.serverIp = connection.manager.protocolConfiguration!.serverAddress!
         notification.vpnIsEnabled = connection.manager.isEnabled
+        
+        if currentVPNRequest == .disconnect && notification.vpnStatus == .connected {
+            log.verbose("current request is disconnect and vpn status is connected, ignore this notification")
+            return
+        }
         NotificationCenter.default.post(notification)
     }
     
@@ -68,6 +73,11 @@ public class BCLVPNNotification {
         notification.localizedDescription = connection.manager.localizedDescription!
         notification.serverIp = protocolConfig!.serverAddress!
         notification.vpnIsEnabled = connection.manager.isEnabled
+        
+        if currentVPNRequest == .disconnect && notification.vpnStatus == .connected {
+            log.verbose("current request is disconnect and vpn status is connected, ignore this notification")
+            return
+        }
         NotificationCenter.default.post(notification)
     }
 }
