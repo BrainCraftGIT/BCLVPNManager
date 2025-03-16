@@ -53,6 +53,8 @@ public class BCLVPNNotification {
             log.verbose("current request is disconnect and vpn status is connected, ignore this notification")
             return
         }
+        
+        print("Posted notification: \(notification)")
         NotificationCenter.default.post(notification)
     }
     
@@ -78,6 +80,8 @@ public class BCLVPNNotification {
             log.verbose("current request is disconnect and vpn status is connected, ignore this notification")
             return
         }
+        
+        print("Posted notification: \(notification)")
         NotificationCenter.default.post(notification)
     }
 }
