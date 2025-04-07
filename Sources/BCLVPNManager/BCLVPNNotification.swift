@@ -8,12 +8,14 @@
 import Foundation
 import NetworkExtension
 import SwiftyBeaver
+import TunnelKitManager
 
 private let log = SwiftyBeaver.self
 
 public class BCLVPNNotification {
     public static let shared = BCLVPNNotification()
     public static let statusDidChangeNotification = Notification.Name("VPNStatusDidChange")
+    public static let didFailNotification = Notification.Name("VPNDidFail")
     
     private init() {
         
@@ -21,6 +23,11 @@ public class BCLVPNNotification {
     
     public func registerNotifications() {
         NotificationCenter.default.addObserver(self, selector: #selector(vpnStatusDidChange(_:)), name: .NEVPNStatusDidChange, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(vpnDidFailed(_:)), name: VPNNotification.didFail, object: nil)
+    }
+    
+    @objc private func vpnDidFailed(_ notification: Notification) {
+        BCLVPNNotification.postDidFailNotification(with: notification.vpnError)
     }
     
     @objc private func vpnStatusDidChange(_ notification: Notification) {
@@ -82,6 +89,12 @@ public class BCLVPNNotification {
         }
         
         print("Posted notification: \(notification)")
+        NotificationCenter.default.post(notification)
+    }
+    
+    static public func postDidFailNotification(with error: Error) {
+        var notification = Notification(name: didFailNotification)
+        notification.vpnError = error
         NotificationCenter.default.post(notification)
     }
 }

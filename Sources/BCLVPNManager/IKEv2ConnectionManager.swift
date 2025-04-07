@@ -66,6 +66,7 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
         IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
             if let error {
                 log.verbose("VPN preference loading error: \(String(describing: error))")
+                BCLVPNNotification.postDidFailNotification(with: error)
             } else {
                 if KeychainHelper.savePassword(IKEv2ConnectionManager.password, account: "pass") {
                     log.verbose("Password saved.")
@@ -106,12 +107,14 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
                 IKEv2ConnectionManager.vpnManager.saveToPreferences { error in
                     if let error = error {
                         print("Failed to save VPN configuration: \(error.localizedDescription)")
+                        BCLVPNNotification.postDidFailNotification(with: error)
                         IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = false
                     } else {
                         print("VPN configuration saved successfully.")
                         IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
                             if let error = error {
                                 print("Failed to load VPN preferences: \(error.localizedDescription)")
+                                BCLVPNNotification.postDidFailNotification(with: error)
                                 IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = false
                                 return
                             }
@@ -119,12 +122,14 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
                             IKEv2ConnectionManager.vpnManager.saveToPreferences { error in
                                 if let error = error {
                                     print("Failed to save VPN configuration: \(error.localizedDescription)")
+                                    BCLVPNNotification.postDidFailNotification(with: error)
                                     IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = false
                                 } else {
                                     print("VPN configuration saved successfully twice.")
                                     IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
                                         if let error = error {
                                             print("Failed to load VPN preferences: \(error.localizedDescription)")
+                                            BCLVPNNotification.postDidFailNotification(with: error)
                                             IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = false
                                             return
                                         }
@@ -134,6 +139,7 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
                                             print("VPN connection started.")
                                         } catch {
                                             print("Failed to start VPN connection: \(error.localizedDescription)")
+                                            BCLVPNNotification.postDidFailNotification(with: error)
                                             IKEv2ConnectionManager.vpnManager.isOnDemandEnabled = false
                                         }
                                     }
@@ -152,6 +158,7 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
         IKEv2ConnectionManager.vpnManager.loadFromPreferences { error in
             guard error == nil else {
                 print("Error loading preferences: \(error!)")
+                BCLVPNNotification.postDidFailNotification(with: error!)
                 return
             }
             
@@ -162,6 +169,7 @@ extension IKEv2ConnectionManager: VPNConnectionManager {
             manager.saveToPreferences { error in
                 guard error == nil else {
                     print("Error saving preferences: \(error!)")
+                    BCLVPNNotification.postDidFailNotification(with: error!)
                     return
                 }
                 print("VPN configuration updated successfully")
