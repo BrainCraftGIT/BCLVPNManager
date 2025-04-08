@@ -94,12 +94,26 @@ public class BCLVPNNotification {
     
     static public func postDidFailNotification(with error: Error) {
         var notification = Notification(name: didFailNotification)
-        notification.vpnError = error
+        notification.vpnDidFailError = error
         NotificationCenter.default.post(notification)
     }
 }
 
 extension Notification {
+    public var vpnDidFailError: Error? {
+        get {
+            guard let vpnDidFailError = userInfo?["vpnDidFailError"] as? Error else {
+                fatalError("Notification has no vpnDidFailError")
+            }
+            return vpnDidFailError
+        }
+        set {
+            var newInfo = userInfo ?? [:]
+            newInfo["vpnDidFailError"] = newValue
+            userInfo = newInfo
+        }
+    }
+    
     public var vpnBundleIdentifier: String? {
         get {
             guard let vpnBundleIdentifier = userInfo?["BundleIdentifier"] as? String else {
