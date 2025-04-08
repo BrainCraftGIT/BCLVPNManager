@@ -27,7 +27,7 @@ public class BCLVPNNotification {
     }
     
     @objc private func vpnDidFailed(_ notification: Notification) {
-        BCLVPNNotification.postDidFailNotification(with: notification.vpnError)
+        BCLVPNNotification.postDidFailNotification(with: notification.vpnError!)
     }
     
     @objc private func vpnStatusDidChange(_ notification: Notification) {
@@ -103,7 +103,8 @@ extension Notification {
     public var vpnDidFailError: Error? {
         get {
             guard let vpnDidFailError = userInfo?["vpnDidFailError"] as? Error else {
-                fatalError("Notification has no vpnDidFailError")
+                print("Notification has no vpnDidFailError")
+                return nil
             }
             return vpnDidFailError
         }
