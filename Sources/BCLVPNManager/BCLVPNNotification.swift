@@ -27,7 +27,7 @@ public class BCLVPNNotification {
     }
     
     @objc private func vpnDidFailed(_ notification: Notification) {
-        //BCLVPNNotification.postDidFailNotification(with: notification.vpnError!)
+        BCLVPNNotification.postDidFailNotification(with: notification.vpnError)
     }
     
     @objc private func vpnStatusDidChange(_ notification: Notification) {
@@ -92,7 +92,7 @@ public class BCLVPNNotification {
         NotificationCenter.default.post(notification)
     }
     
-    static public func postDidFailNotification(with error: Error) {
+    static public func postDidFailNotification(with error: Error?) {
         var notification = Notification(name: didFailNotification)
         notification.vpnDidFailError = error
         NotificationCenter.default.post(notification)
