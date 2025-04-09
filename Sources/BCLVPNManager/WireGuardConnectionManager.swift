@@ -28,6 +28,7 @@ public class WireGuardConnectionManager {
     let serverPublicKey: String
     let serverAddress: String
     let serverPort: String
+    let allowedIPs: String
     let dns: String
     var onDemandRules: [NEOnDemandRule]
     
@@ -41,10 +42,11 @@ public class WireGuardConnectionManager {
                                    serverPublicKey: String,
                                    serverAddress: String,
                                    serverPort: String,
+                                   allowedIPs: String,
                                    dns: String,
                                    onDemandRules: [NEOnDemandRule]) -> WireGuardConnectionManager {
         if wireguardConnectionManager == nil {
-            wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort, dns: dns, onDemandRules: onDemandRules)
+            wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort, allowedIPs: allowedIPs, dns: dns, onDemandRules: onDemandRules)
             
             Task {
                 await vpn.prepare()
@@ -62,9 +64,10 @@ public class WireGuardConnectionManager {
                                     serverPublicKey: String,
                                     serverAddress: String,
                                     serverPort: String,
+                                    allowedIPs: String,
                                     dns: String,
                                     onDemandRules: [NEOnDemandRule]) -> WireGuardConnectionManager {
-        wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort, dns: dns, onDemandRules: onDemandRules)
+        wireguardConnectionManager = WireGuardConnectionManager(name: name, tunnelIdentifier: tunnelIdentifier, appGroup: appGroup, clientPrivateKey: clientPrivateKey, clientAddress: clientAddress, serverPublicKey: serverPublicKey, serverAddress: serverAddress, serverPort: serverPort, allowedIPs: allowedIPs, dns: dns, onDemandRules: onDemandRules)
         
         Task {
             await vpn.prepare()
@@ -81,6 +84,7 @@ public class WireGuardConnectionManager {
                  serverPublicKey: String,
                  serverAddress: String,
                  serverPort: String,
+                 allowedIPs: String,
                  dns: String,
                  onDemandRules: [NEOnDemandRule]) {
         self.name = name
@@ -91,19 +95,26 @@ public class WireGuardConnectionManager {
         self.serverPublicKey = serverPublicKey
         self.serverAddress = serverAddress
         self.serverPort = serverPort
+        self.allowedIPs = allowedIPs
         self.dns = dns
         self.onDemandRules = onDemandRules
     }
 }
 
 extension WireGuardConnectionManager: VPNConnectionManager {
+    private func parseAddresses(from string: String) -> [String] {
+        return string
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+    }
+    
     public static func setup(with config: any VPNConnectionConfig) -> (any VPNConnectionManager)? {
         guard let config = config as? WireGuardConnectionConfig else {
             print("config isn't valid!")
             return nil
         }
         
-        return WireGuardConnectionManager.updateConfig(name: config.name, tunnelIdentifier: config.tunnelIdentifier, appGroup: config.appGroup, clientPrivateKey: config.clientPrivateKey, clientAddress: config.clientAddress, serverPublicKey: config.serverPublicKey, serverAddress: config.serverAddress, serverPort: config.serverPort, dns: config.dns, onDemandRules: config.onDemandRules)
+        return WireGuardConnectionManager.updateConfig(name: config.name, tunnelIdentifier: config.tunnelIdentifier, appGroup: config.appGroup, clientPrivateKey: config.clientPrivateKey, clientAddress: config.clientAddress, serverPublicKey: config.serverPublicKey, serverAddress: config.serverAddress, serverPort: config.serverPort, allowedIPs: config.allowedIPs, dns: config.dns, onDemandRules: config.onDemandRules)
     }
     
     public func connect() {
@@ -115,10 +126,10 @@ extension WireGuardConnectionManager: VPNConnectionManager {
             return
         }
         
-        builder.addresses = [clientAddress]
-        builder.dnsServers = [dns]
+        builder.addresses = parseAddresses(from: clientAddress)
+        builder.dnsServers = parseAddresses(from: dns)
         do {
-            try builder.addPeer(serverPublicKey, endpoint: "\(serverAddress):\(serverPort)")
+            try builder.addPeer(serverPublicKey, endpoint: "\(serverAddress):\(serverPort)", allowedIPs: parseAddresses(from: allowedIPs))
         } catch {
             log.verbose(">>> \(error)")
             return

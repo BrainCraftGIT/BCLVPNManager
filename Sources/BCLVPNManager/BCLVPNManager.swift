@@ -135,7 +135,7 @@ public class BCLVPNManager {
                             let ovpnManager = OpenVPNConnectionManager.setup(with: ovpnConfig)
                             completion(ovpnManager)
                         } else {
-                            let wgConfig = WireGuardConnectionConfig(name: "", tunnelIdentifier: "", appGroup: "", clientPrivateKey: "", clientAddress: "", serverPublicKey: "", serverAddress: "", serverPort: "", dns: "")
+                            let wgConfig = WireGuardConnectionConfig(name: "", tunnelIdentifier: "", appGroup: "", clientPrivateKey: "", clientAddress: "", serverPublicKey: "", serverAddress: "", serverPort: "", allowedIPs: "", dns: "")
                             let wgManager = WireGuardConnectionManager.setup(with: wgConfig)
                             completion(wgManager)
                         }

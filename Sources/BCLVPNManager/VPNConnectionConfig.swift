@@ -45,6 +45,7 @@ public class WireGuardConnectionConfig: VPNConnectionConfig {
     let serverPublicKey: String
     let serverAddress: String
     let serverPort: String
+    let allowedIPs: String
     let dns: String
     
     public init(name: String,
@@ -55,6 +56,7 @@ public class WireGuardConnectionConfig: VPNConnectionConfig {
                 serverPublicKey: String,
                 serverAddress: String,
                 serverPort: String,
+                allowedIPs: String,
                 dns: String,
                 onDemandRules: [NEOnDemandRule] = []) {
         self.name = name
@@ -65,6 +67,7 @@ public class WireGuardConnectionConfig: VPNConnectionConfig {
         self.serverPublicKey = serverPublicKey
         self.serverAddress = serverAddress
         self.serverPort = serverPort
+        self.allowedIPs = allowedIPs
         self.dns = dns
         self.onDemandRules = onDemandRules
     }
