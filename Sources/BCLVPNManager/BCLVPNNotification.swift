@@ -14,8 +14,8 @@ private let log = SwiftyBeaver.self
 
 public class BCLVPNNotification {
     public static let shared = BCLVPNNotification()
-    public static let statusDidChangeNotification = Notification.Name("VPNStatusDidChange")
-    public static let didFailNotification = Notification.Name("VPNDidFail")
+    public static let statusDidChangeNotification = Notification.Name("BCLVPNNotification_statusDidChangeNotification")
+    public static let didFailNotification = Notification.Name("BCLVPNNotification_didFailNotification")
     
     private init() {
         
