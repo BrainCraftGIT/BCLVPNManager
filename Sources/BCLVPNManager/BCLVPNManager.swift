@@ -49,17 +49,42 @@ public class BCLVPNManager {
     
     public func disconnect() {
         currentVPNRequest = .disconnect
-        if vpnConnectionManager == nil {
-            NEVPNManager.shared().loadFromPreferences { error in
-                let connection = NEVPNManager.shared().connection
-                let status = connection.status
+        
+        if vpnConnectionManager != nil {
+            vpnConnectionManager.disconnect()
+        }
+        
+        NEVPNManager.shared().loadFromPreferences { error in
+            let connection = NEVPNManager.shared().connection
+            let status = connection.status
+            
+            if status == .connected {
+                connection.stopVPNTunnel()
                 
-                if status == .connected {
-                    connection.stopVPNTunnel()
+                connection.manager.onDemandRules = []
+                connection.manager.isOnDemandEnabled = false
+                connection.manager.saveToPreferences { error in
+                    guard error == nil else {
+                        print("Error saving preferences: \(error!)")
+                        return
+                    }
+                    print("VPN configuration updated successfully")
+                }
+            }
+        }
+        
+        NETunnelProviderManager.loadAllFromPreferences() { managers, error in
+            guard let managers else {
+                return
+            }
+            
+            for manager in managers {
+                if manager.connection.status == .connected {
+                    manager.connection.stopVPNTunnel()
                     
-                    connection.manager.onDemandRules = []
-                    connection.manager.isOnDemandEnabled = false
-                    connection.manager.saveToPreferences { error in
+                    //manager.onDemandRules = []
+                    manager.isOnDemandEnabled = false
+                    manager.saveToPreferences { error in
                         guard error == nil else {
                             print("Error saving preferences: \(error!)")
                             return
@@ -68,30 +93,6 @@ public class BCLVPNManager {
                     }
                 }
             }
-            
-            NETunnelProviderManager.loadAllFromPreferences() { managers, error in
-                guard let managers else {
-                    return
-                }
-                
-                for manager in managers {
-                    if manager.connection.status == .connected {
-                        manager.connection.stopVPNTunnel()
-                        
-                        //manager.onDemandRules = []
-                        manager.isOnDemandEnabled = false
-                        manager.saveToPreferences { error in
-                            guard error == nil else {
-                                print("Error saving preferences: \(error!)")
-                                return
-                            }
-                            print("VPN configuration updated successfully")
-                        }
-                    }
-                }
-            }
-        } else {
-            vpnConnectionManager.disconnect()
         }
     }
     
