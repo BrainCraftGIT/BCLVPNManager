@@ -2,12 +2,12 @@
   "object": {
     "pins": [
       {
-        "package": "openssl-apple",
-        "repositoryURL": "https://github.com/passepartoutvpn/openssl-apple",
+        "package": "OpenSSL",
+        "repositoryURL": "https://github.com/krzyzanowskim/OpenSSL.git",
         "state": {
           "branch": null,
-          "revision": "685680e3adbfccdeef84d37fc5732b0031f188c7",
-          "version": "3.2.108"
+          "revision": "623c84da314e85363236507ca38a4bde65df21c3",
+          "version": "3.3.3001"
         }
       },
       {
@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/BrainCraftGIT/tunnelkit.git",
         "state": {
           "branch": "expose-tunnelkitmanager",
-          "revision": "516c87cd641c86f9236bd52999e2a9209f3a36ac",
+          "revision": "8d46f7a82704e93f060784f555d1463b351e82a3",
           "version": null
         }
       },
