@@ -55,14 +55,27 @@ public class BCLVPNNotification {
         notification.localizedDescription = connection.manager.localizedDescription!
         notification.serverIp = connection.manager.protocolConfiguration!.serverAddress!
         notification.vpnIsEnabled = connection.manager.isEnabled
+        notification.lastDisconnectError = nil
         
         if currentVPNRequest == .disconnect && notification.vpnStatus == .connected {
             log.verbose("current request is disconnect and vpn status is connected, ignore this notification")
             return
         }
         
-        print("Posted notification: \(notification)")
-        NotificationCenter.default.post(notification)
+        if #available(iOS 17.0, *) {
+            connection.fetchLastDisconnectError { error in
+                if let error = error {
+                    notification.lastDisconnectError = error
+                }
+                
+                print("Posted notification: \(notification)")
+                NotificationCenter.default.post(notification)
+            }
+        } else {
+            // Fallback on earlier versions
+            print("Posted notification: \(notification)")
+            NotificationCenter.default.post(notification)
+        }
     }
     
     private func notifyStatus(_ connection: NETunnelProviderSession) {
@@ -82,14 +95,27 @@ public class BCLVPNNotification {
         notification.localizedDescription = connection.manager.localizedDescription!
         notification.serverIp = protocolConfig!.serverAddress!
         notification.vpnIsEnabled = connection.manager.isEnabled
+        notification.lastDisconnectError = nil
         
         if currentVPNRequest == .disconnect && notification.vpnStatus == .connected {
             log.verbose("current request is disconnect and vpn status is connected, ignore this notification")
             return
         }
         
-        print("Posted notification: \(notification)")
-        NotificationCenter.default.post(notification)
+        if #available(iOS 17.0, *) {
+            connection.fetchLastDisconnectError { error in
+                if let error = error {
+                    notification.lastDisconnectError = error
+                }
+                
+                print("Posted notification: \(notification)")
+                NotificationCenter.default.post(notification)
+            }
+        } else {
+            // Fallback on earlier versions
+            print("Posted notification: \(notification)")
+            NotificationCenter.default.post(notification)
+        }
     }
     
     static public func postDidFailNotification(with error: Error?) {
@@ -181,6 +207,20 @@ extension Notification {
         set {
             var newInfo = userInfo ?? [:]
             newInfo["IsEnabled"] = newValue
+            userInfo = newInfo
+        }
+    }
+    
+    public var lastDisconnectError: Error? {
+        get {
+            guard let lastDisconnectError = userInfo?["lastDisconnectError"] as? Error else {
+                fatalError("Notification has no vpnIsEnabled")
+            }
+            return lastDisconnectError
+        }
+        set {
+            var newInfo = userInfo ?? [:]
+            newInfo["lastDisconnectError"] = newValue
             userInfo = newInfo
         }
     }
