@@ -56,6 +56,7 @@ public class BCLVPNNotification {
         notification.serverIp = connection.manager.protocolConfiguration!.serverAddress!
         notification.vpnIsEnabled = connection.manager.isEnabled
         notification.lastDisconnectError = nil
+        notification.userName = connection.manager.protocolConfiguration?.username
         
         if currentVPNRequest == .disconnect && notification.vpnStatus == .connected {
             log.verbose("current request is disconnect and vpn status is connected, ignore this notification")
@@ -96,6 +97,7 @@ public class BCLVPNNotification {
         notification.serverIp = protocolConfig!.serverAddress!
         notification.vpnIsEnabled = connection.manager.isEnabled
         notification.lastDisconnectError = nil
+        notification.userName = connection.manager.protocolConfiguration?.username
         
         if currentVPNRequest == .disconnect && notification.vpnStatus == .connected {
             log.verbose("current request is disconnect and vpn status is connected, ignore this notification")
@@ -165,6 +167,20 @@ extension Notification {
         set {
             var newInfo = userInfo ?? [:]
             newInfo["Status"] = newValue
+            userInfo = newInfo
+        }
+    }
+    
+    public var userName: String? {
+        get {
+            guard let userName = userInfo?["userName"] as? String else {
+                fatalError("Notification has no userName")
+            }
+            return userName
+        }
+        set {
+            var newInfo = userInfo ?? [:]
+            newInfo["userName"] = newValue
             userInfo = newInfo
         }
     }
