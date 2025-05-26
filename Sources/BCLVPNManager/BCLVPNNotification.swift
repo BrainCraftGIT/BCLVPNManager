@@ -174,7 +174,8 @@ extension Notification {
     public var userName: String? {
         get {
             guard let userName = userInfo?["userName"] as? String else {
-                fatalError("Notification has no userName")
+                print("Notification has no userName")
+                return nil
             }
             return userName
         }
