@@ -230,7 +230,8 @@ extension Notification {
     public var lastDisconnectError: Error? {
         get {
             guard let lastDisconnectError = userInfo?["lastDisconnectError"] as? Error else {
-                fatalError("Notification has no vpnIsEnabled")
+                print("Notification has no lastDisconnectError")
+                return nil
             }
             return lastDisconnectError
         }
