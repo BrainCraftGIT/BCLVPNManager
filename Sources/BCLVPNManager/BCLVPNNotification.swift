@@ -97,7 +97,21 @@ public class BCLVPNNotification {
         notification.serverIp = protocolConfig!.serverAddress!
         notification.vpnIsEnabled = connection.manager.isEnabled
         notification.lastDisconnectError = nil
-        notification.userName = connection.manager.protocolConfiguration?.username
+        
+        if bundleId.lowercased().contains("openvpn") {
+            notification.userName = connection.manager.protocolConfiguration?.username
+        } else {
+            guard let proto = connection.manager.protocolConfiguration as? NETunnelProviderProtocol else {
+                notification.userName = nil
+                return
+            }
+            if let providerConfig = proto.providerConfiguration,
+               let interface = providerConfig["interface"] as? [String: Any],
+               let privateKey = interface["privateKey"] as? String {
+                print("Private key: \(privateKey)")
+                notification.userName = privateKey
+            }
+        }
         
         if currentVPNRequest == .disconnect && notification.vpnStatus == .connected {
             log.verbose("current request is disconnect and vpn status is connected, ignore this notification")
