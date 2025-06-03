@@ -106,10 +106,21 @@ public class BCLVPNNotification {
                 return
             }
             if let providerConfig = proto.providerConfiguration,
-               let interface = providerConfig["interface"] as? [String: Any],
-               let privateKey = interface["privateKey"] as? String {
-                print("Private key: \(privateKey)")
-                notification.userName = privateKey
+               let configString = providerConfig["configuration"] as? String {
+
+                // Split the config into lines
+                let lines = configString.components(separatedBy: .newlines)
+
+                // Search for the PrivateKey line
+                if let privateKeyLine = lines.first(where: { $0.starts(with: "PrivateKey") }) {
+                    // Split line into key and value
+                    let components = privateKeyLine.components(separatedBy: "=")
+                    if components.count > 1 {
+                        let privateKey = components[1].trimmingCharacters(in: .whitespaces)
+                        print("Private Key: \(privateKey)")
+                        notification.userName = privateKey
+                    }
+                }
             }
         }
         
