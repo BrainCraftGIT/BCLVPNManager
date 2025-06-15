@@ -31,6 +31,7 @@ public typealias VPNStatus = TunnelKitManager.VPNStatus
 //public typealias VPNNotification = TunnelKitManager.VPNNotification
 
 var currentVPNRequest: VPNRequest = .none
+var savedConfig: VPNConnectionConfig?
 
 public class BCLVPNManager {
     public static let shared = BCLVPNManager()
@@ -97,6 +98,7 @@ public class BCLVPNManager {
     }
     
     public func setup(with config: VPNConnectionConfig) {
+        savedConfig = config
         if config is IKEv2ConnectionConfig {
             vpnConnectionManager = IKEv2ConnectionManager.setup(with: config)
         } else if config is OpenVPNConnectionConfig {

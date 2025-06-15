@@ -57,6 +57,7 @@ public class BCLVPNNotification {
         notification.vpnIsEnabled = connection.manager.isEnabled
         notification.lastDisconnectError = nil
         notification.userName = connection.manager.protocolConfiguration?.username
+        notification.ikevConfig = savedConfig as? IKEv2ConnectionConfig
         
         if currentVPNRequest == .disconnect && notification.vpnStatus == .connected {
             log.verbose("current request is disconnect and vpn status is connected, ignore this notification")
@@ -100,7 +101,9 @@ public class BCLVPNNotification {
         
         if bundleId.lowercased().contains("openvpn") {
             notification.userName = connection.manager.protocolConfiguration?.username
+            notification.ovpnConfig = savedConfig as? OpenVPNConnectionConfig
         } else {
+            notification.wgConfig = savedConfig as? WireGuardConnectionConfig
             guard let proto = connection.manager.protocolConfiguration as? NETunnelProviderProtocol else {
                 notification.userName = nil
                 return
@@ -264,6 +267,51 @@ extension Notification {
         set {
             var newInfo = userInfo ?? [:]
             newInfo["lastDisconnectError"] = newValue
+            userInfo = newInfo
+        }
+    }
+    
+    public var ikevConfig: IKEv2ConnectionConfig? {
+        get {
+            guard let ikevConfig = userInfo?["ikevConfig"] as? IKEv2ConnectionConfig else {
+                print("Notification has no ikevConfig")
+                return nil
+            }
+            return ikevConfig
+        }
+        set {
+            var newInfo = userInfo ?? [:]
+            newInfo["ikevConfig"] = newValue
+            userInfo = newInfo
+        }
+    }
+    
+    public var wgConfig: WireGuardConnectionConfig? {
+        get {
+            guard let wgConfig = userInfo?["wgConfig"] as? WireGuardConnectionConfig else {
+                print("Notification has no wgConfig")
+                return nil
+            }
+            return wgConfig
+        }
+        set {
+            var newInfo = userInfo ?? [:]
+            newInfo["wgConfig"] = newValue
+            userInfo = newInfo
+        }
+    }
+    
+    public var ovpnConfig: OpenVPNConnectionConfig? {
+        get {
+            guard let ovpnConfig = userInfo?["ovpnConfig"] as? OpenVPNConnectionConfig else {
+                print("Notification has no ovpnConfig")
+                return nil
+            }
+            return ovpnConfig
+        }
+        set {
+            var newInfo = userInfo ?? [:]
+            newInfo["ovpnConfig"] = newValue
             userInfo = newInfo
         }
     }
