@@ -57,7 +57,12 @@ public class BCLVPNNotification {
         notification.vpnIsEnabled = connection.manager.isEnabled
         notification.lastDisconnectError = nil
         notification.userName = connection.manager.protocolConfiguration?.username
-        notification.ikevConfig = savedConfig as? IKEv2ConnectionConfig
+        
+        guard let savedIkev2Config = savedConfig as? IKEv2ConnectionConfig else {
+            log.verbose("couldn't get config")
+            return
+        }
+        notification.ikevConfig = IKEv2CodableConfig(from: savedIkev2Config).toJSONString()
         
         if currentVPNRequest == .disconnect && notification.vpnStatus == .connected {
             log.verbose("current request is disconnect and vpn status is connected, ignore this notification")
@@ -101,9 +106,18 @@ public class BCLVPNNotification {
         
         if bundleId.lowercased().contains("openvpn") {
             notification.userName = connection.manager.protocolConfiguration?.username
-            notification.ovpnConfig = savedConfig as? OpenVPNConnectionConfig
+            
+            guard let savedOvpnConfig = savedConfig as? OpenVPNConnectionConfig else {
+                log.verbose("couldn't get config")
+                return
+            }
+            notification.ovpnConfig = OpenVPNCodableConfig(from: savedOvpnConfig).toJSONString()
         } else {
-            notification.wgConfig = savedConfig as? WireGuardConnectionConfig
+            guard let savedWgConfig = savedConfig as? WireGuardConnectionConfig else {
+                log.verbose("couldn't get config")
+                return
+            }
+            notification.wgConfig = WireGuardCodableConfig(from: savedWgConfig).toJSONString()
             guard let proto = connection.manager.protocolConfiguration as? NETunnelProviderProtocol else {
                 notification.userName = nil
                 return
@@ -271,9 +285,9 @@ extension Notification {
         }
     }
     
-    public var ikevConfig: IKEv2ConnectionConfig? {
+    public var ikevConfig: String? {
         get {
-            guard let ikevConfig = userInfo?["ikevConfig"] as? IKEv2ConnectionConfig else {
+            guard let ikevConfig = userInfo?["ikevConfig"] as? String else {
                 print("Notification has no ikevConfig")
                 return nil
             }
@@ -286,9 +300,9 @@ extension Notification {
         }
     }
     
-    public var wgConfig: WireGuardConnectionConfig? {
+    public var wgConfig: String? {
         get {
-            guard let wgConfig = userInfo?["wgConfig"] as? WireGuardConnectionConfig else {
+            guard let wgConfig = userInfo?["wgConfig"] as? String else {
                 print("Notification has no wgConfig")
                 return nil
             }
@@ -301,9 +315,9 @@ extension Notification {
         }
     }
     
-    public var ovpnConfig: OpenVPNConnectionConfig? {
+    public var ovpnConfig: String? {
         get {
-            guard let ovpnConfig = userInfo?["ovpnConfig"] as? OpenVPNConnectionConfig else {
+            guard let ovpnConfig = userInfo?["ovpnConfig"] as? String else {
                 print("Notification has no ovpnConfig")
                 return nil
             }

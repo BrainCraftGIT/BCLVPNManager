@@ -93,3 +93,119 @@ public class OpenVPNConnectionConfig: VPNConnectionConfig {
         self.onDemandRules = onDemandRules
     }
 }
+
+struct IKEv2CodableConfig: Codable {
+    let name: String
+    let remoteIdentifier: String
+    let serverIp: String
+    let username: String?
+    let password: String?
+    let sharedSecretReference: Data?
+
+    init(from config: IKEv2ConnectionConfig) {
+        self.name = config.name
+        self.remoteIdentifier = config.remoteIdentifier
+        self.serverIp = config.serverIp
+        self.username = config.username
+        self.password = config.password
+        self.sharedSecretReference = config.sharedSecretReference
+    }
+
+    func toOriginal() -> IKEv2ConnectionConfig {
+        return IKEv2ConnectionConfig(
+            name: name,
+            remoteIdentifier: remoteIdentifier,
+            serverIp: serverIp,
+            username: username,
+            password: password,
+            sharedSecretReference: sharedSecretReference
+        )
+    }
+}
+
+
+struct WireGuardCodableConfig: Codable {
+    let name: String
+    let tunnelIdentifier: String
+    let appGroup: String
+    let clientPrivateKey: String
+    let clientAddress: String
+    let serverPublicKey: String
+    let serverAddress: String
+    let serverPort: String
+    let allowedIPs: String
+    let dns: String
+
+    init(from config: WireGuardConnectionConfig) {
+        self.name = config.name
+        self.tunnelIdentifier = config.tunnelIdentifier
+        self.appGroup = config.appGroup
+        self.clientPrivateKey = config.clientPrivateKey
+        self.clientAddress = config.clientAddress
+        self.serverPublicKey = config.serverPublicKey
+        self.serverAddress = config.serverAddress
+        self.serverPort = config.serverPort
+        self.allowedIPs = config.allowedIPs
+        self.dns = config.dns
+    }
+
+    func toOriginal() -> WireGuardConnectionConfig {
+        return WireGuardConnectionConfig(
+            name: name,
+            tunnelIdentifier: tunnelIdentifier,
+            appGroup: appGroup,
+            clientPrivateKey: clientPrivateKey,
+            clientAddress: clientAddress,
+            serverPublicKey: serverPublicKey,
+            serverAddress: serverAddress,
+            serverPort: serverPort,
+            allowedIPs: allowedIPs,
+            dns: dns
+        )
+    }
+}
+
+struct OpenVPNCodableConfig: Codable {
+    let name: String
+    let username: String
+    let password: String
+    let appGroup: String
+    let tunnelIdentifier: String
+    let config: String
+
+    init(from config: OpenVPNConnectionConfig) {
+        self.name = config.name
+        self.username = config.username
+        self.password = config.password
+        self.appGroup = config.appGroup
+        self.tunnelIdentifier = config.tunnelIdentifier
+        self.config = config.config
+    }
+
+    func toOriginal() -> OpenVPNConnectionConfig {
+        return OpenVPNConnectionConfig(
+            name: name,
+            username: username,
+            password: password,
+            appGroup: appGroup,
+            tunnelIdentifier: tunnelIdentifier,
+            config: config
+        )
+    }
+}
+
+extension Encodable {
+    func toJSONString(pretty: Bool = false) -> String? {
+        let encoder = JSONEncoder()
+        if pretty { encoder.outputFormatting = .prettyPrinted }
+        guard let data = try? encoder.encode(self) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+}
+
+extension Decodable {
+    static func fromJSONString(_ jsonString: String) -> Self? {
+        guard let data = jsonString.data(using: .utf8) else { return nil }
+        return try? JSONDecoder().decode(Self.self, from: data)
+    }
+}
